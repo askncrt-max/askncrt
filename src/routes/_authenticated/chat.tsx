@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/chat")({
 const SUGGESTIONS = [
   { icon: BookOpen, title: "Explain a chapter", hint: "Photosynthesis for Class 7 Science" },
   { icon: Zap, title: "Solve a question", hint: "Step-by-step math solution" },
-  { icon: Sparkles, title: "Generate a quiz", hint: "5 MCQs on the French Revolution" },
+  { icon: Sparkles, title: "Chapter MCQ quiz", hint: "5 MCQs on this chapter — hide answers, I'll try first" },
   { icon: FileText, title: "Summarise notes", hint: "Key points from a chapter" },
 ];
 
