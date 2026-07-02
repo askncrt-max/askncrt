@@ -81,6 +81,17 @@ function AuthPage() {
           },
         });
         if (error) throw error;
+        applyRememberPreference(remember);
+        toast.success("Welcome to AskNCERT! Check your email if verification is required.");
+        navigate({ to: "/chat", replace: true });
+      } else if (mode === "signin") {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        applyRememberPreference(remember);
+        toast.success("Welcome back!");
+        navigate({ to: "/chat", replace: true });
+        });
+        if (error) throw error;
         toast.success("Welcome to AskNCERT! Check your email if verification is required.");
         navigate({ to: "/chat", replace: true });
       } else if (mode === "signin") {
