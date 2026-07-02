@@ -17,6 +17,35 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [remember, setRemember] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem("askncert.remember") !== "false";
+  });
+
+  function applyRememberPreference(shouldRemember: boolean) {
+    try {
+      localStorage.setItem("askncert.remember", shouldRemember ? "true" : "false");
+      const key = Object.keys(localStorage).find(
+        (k) => k.startsWith("sb-") && k.endsWith("-auth-token"),
+      );
+      if (!key) return;
+      if (!shouldRemember) {
+        const val = localStorage.getItem(key);
+        if (val) {
+          sessionStorage.setItem(key, val);
+          localStorage.removeItem(key);
+        }
+      } else {
+        const val = sessionStorage.getItem(key);
+        if (val) {
+          localStorage.setItem(key, val);
+          sessionStorage.removeItem(key);
+        }
+      }
+    } catch {
+      /* ignore storage errors */
+    }
+  }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -52,11 +81,13 @@ function AuthPage() {
           },
         });
         if (error) throw error;
+        applyRememberPreference(remember);
         toast.success("Welcome to AskNCERT! Check your email if verification is required.");
         navigate({ to: "/chat", replace: true });
       } else if (mode === "signin") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        applyRememberPreference(remember);
         toast.success("Welcome back!");
         navigate({ to: "/chat", replace: true });
       } else {
@@ -148,6 +179,19 @@ function AuthPage() {
                 placeholder="At least 6 characters"
               />
             )}
+
+            {mode !== "forgot" && (
+              <label className="flex cursor-pointer items-center gap-2 pt-1 text-xs text-muted-foreground select-none">
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  className="size-4 rounded border-input accent-primary"
+                />
+                Remember me on this device
+              </label>
+            )}
+
 
             <button
               type="submit"
