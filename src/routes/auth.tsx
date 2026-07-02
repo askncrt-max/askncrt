@@ -180,6 +180,19 @@ function AuthPage() {
               />
             )}
 
+            {mode !== "forgot" && (
+              <label className="flex cursor-pointer items-center gap-2 pt-1 text-xs text-muted-foreground select-none">
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  className="size-4 rounded border-input accent-primary"
+                />
+                Remember me on this device
+              </label>
+            )}
+
+
             <button
               type="submit"
               disabled={loading}
