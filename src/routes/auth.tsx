@@ -187,7 +187,7 @@ function AuthPage() {
         </div>
 
         <p className="mt-6 text-center text-[11px] text-muted-foreground">
-          Built for Indian NCERT students, Class 5 to Class 12.
+          Built for Indian NCERT students, built by Dhiraj
         </p>
       </div>
     </div>
