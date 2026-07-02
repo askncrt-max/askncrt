@@ -17,6 +17,35 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [remember, setRemember] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem("askncert.remember") !== "false";
+  });
+
+  function applyRememberPreference(shouldRemember: boolean) {
+    try {
+      localStorage.setItem("askncert.remember", shouldRemember ? "true" : "false");
+      const key = Object.keys(localStorage).find(
+        (k) => k.startsWith("sb-") && k.endsWith("-auth-token"),
+      );
+      if (!key) return;
+      if (!shouldRemember) {
+        const val = localStorage.getItem(key);
+        if (val) {
+          sessionStorage.setItem(key, val);
+          localStorage.removeItem(key);
+        }
+      } else {
+        const val = sessionStorage.getItem(key);
+        if (val) {
+          localStorage.setItem(key, val);
+          sessionStorage.removeItem(key);
+        }
+      }
+    } catch {
+      /* ignore storage errors */
+    }
+  }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
