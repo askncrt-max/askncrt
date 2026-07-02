@@ -37,8 +37,10 @@ const SUGGESTIONS = [
 ];
 
 const QUICK_ACTIONS = [
-  "Explain simply",
+  "Explain again in simpler words",
   "Explain in Hindi",
+  "Ask me 5 MCQs on this chapter (don't reveal answers yet)",
+  "Now show the MCQ answers with explanations",
   "Short answer",
   "Detailed answer",
   "Give an example",
