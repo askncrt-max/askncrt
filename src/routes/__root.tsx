@@ -88,6 +88,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Ask anything from NCERT. Chapter scans, question solver, quizzes, notes and reminders — all powered by AI.",
       },
+      { name: "description", content: "NCERT Smart Study is an AI study assistant for students, offering chapter summaries, question solving, and quizzes." },
+      { property: "og:description", content: "NCERT Smart Study is an AI study assistant for students, offering chapter summaries, question solving, and quizzes." },
+      { name: "twitter:description", content: "NCERT Smart Study is an AI study assistant for students, offering chapter summaries, question solving, and quizzes." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/86bc2b40-7f17-48aa-a2d5-a68b9dc55ed3/id-preview-e2cfe27d--c0009550-8917-4c29-9502-b306183e4b54.lovable.app-1783074414869.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/86bc2b40-7f17-48aa-a2d5-a68b9dc55ed3/id-preview-e2cfe27d--c0009550-8917-4c29-9502-b306183e4b54.lovable.app-1783074414869.png" },
     ],
     links: [
       {
