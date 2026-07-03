@@ -10,6 +10,23 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/planner")({
   component: PlannerPage,
+  head: () => ({
+    meta: [
+      { title: "Study planner — AskNCERT" },
+      {
+        name: "description",
+        content:
+          "Plan your NCERT study sessions, homework and exams with AskNCERT's reminders and daily goals.",
+      },
+      { property: "og:title", content: "Study planner — AskNCERT" },
+      {
+        property: "og:description",
+        content: "Reminders and daily goals for NCERT Class 5-12 students.",
+      },
+      { property: "og:url", content: "https://askncrt.lovable.app/planner" },
+    ],
+    links: [{ rel: "canonical", href: "https://askncrt.lovable.app/planner" }],
+  }),
 });
 
 const TYPES = [
