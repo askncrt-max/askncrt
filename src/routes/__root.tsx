@@ -73,6 +73,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "AskNCERT is an AI-powered study assistant for Class 5-12 NCERT students. Ask questions, scan chapters, solve problems, save notes, and plan your study.",
       },
       { name: "theme-color", content: "#f7fbf8" },
+      { property: "og:site_name", content: "AskNCERT" },
       { property: "og:title", content: "AskNCERT — AI study assistant for NCERT students" },
       {
         property: "og:description",
@@ -82,11 +83,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "AskNCERT — AI study assistant for NCERT students" },
-      { name: "description", content: "AskNCERT — Your AI Study Partner for NCERT. 📚 Instant Answers · 📝 Homework Help · 🎯 Exam Preparation · 🤖 Powered by AI" },
-      { property: "og:description", content: "AskNCERT — Your AI Study Partner for NCERT. 📚 Instant Answers · 📝 Homework Help · 🎯 Exam Preparation · 🤖 Powered by AI" },
-      { name: "twitter:description", content: "AskNCERT — Your AI Study Partner for NCERT. 📚 Instant Answers · 📝 Homework Help · 🎯 Exam Preparation · 🤖 Powered by AI" },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/88be309a-0c85-43c4-8790-085b72e9e8b4" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/88be309a-0c85-43c4-8790-085b72e9e8b4" },
+      {
+        name: "twitter:description",
+        content:
+          "Ask anything from NCERT. Chapter scans, question solver, quizzes, notes and reminders — all powered by AI.",
+      },
     ],
     links: [
       {
@@ -96,7 +97,44 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              name: "AskNCERT",
+              url: "https://askncrt.lovable.app",
+              description:
+                "AI-powered study assistant built for Indian NCERT students from Class 5 to Class 12.",
+            },
+            {
+              "@type": "WebSite",
+              name: "AskNCERT",
+              url: "https://askncrt.lovable.app",
+              inLanguage: ["en", "hi"],
+            },
+            {
+              "@type": "Service",
+              name: "AskNCERT AI Study Assistant",
+              serviceType: "Online tutoring and homework help",
+              areaServed: "IN",
+              audience: {
+                "@type": "EducationalAudience",
+                educationalRole: "student",
+              },
+              provider: { "@type": "Organization", name: "AskNCERT" },
+              description:
+                "NCERT homework help, chapter scans, question solving, quizzes and exam preparation for Class 5-12 students.",
+            },
+          ],
+        }),
+      },
+    ],
   }),
+
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
