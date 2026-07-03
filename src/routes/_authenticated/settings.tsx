@@ -10,6 +10,23 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
+  head: () => ({
+    meta: [
+      { title: "Settings — AskNCERT" },
+      {
+        name: "description",
+        content:
+          "Manage your AskNCERT profile, class level, language and dark mode preferences.",
+      },
+      { property: "og:title", content: "Settings — AskNCERT" },
+      {
+        property: "og:description",
+        content: "Manage your AskNCERT profile and preferences.",
+      },
+      { property: "og:url", content: "https://askncrt.lovable.app/settings" },
+    ],
+    links: [{ rel: "canonical", href: "https://askncrt.lovable.app/settings" }],
+  }),
 });
 
 function SettingsPage() {
