@@ -134,7 +134,7 @@ function AuthPage() {
           <div className="grid size-14 place-items-center rounded-2xl bg-primary shadow-glow">
             <Sparkles className="size-6 text-primary-foreground" />
           </div>
-          <h1 className="mt-5 font-display text-3xl font-bold tracking-tight">AskNCERT</h1>
+          <h1 className="mt-5 font-display text-3xl font-bold tracking-tight">AskNCERT — Your AI Study Partner for NCERT</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {mode === "signup"
               ? "Create your account to start studying smarter"
