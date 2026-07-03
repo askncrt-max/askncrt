@@ -1,0 +1,10 @@
+# AskNCERT
+
+> AI-powered study assistant built for Indian NCERT students from Class 5 to Class 12. Ask questions, scan chapters, solve problems, save notes and plan your study.
+
+AskNCERT helps NCERT students get instant AI explanations, chapter summaries, formulas, MCQ practice and homework help in English and Hindi.
+
+## Pages
+
+- [Home](/): Landing page for AskNCERT.
+- [Sign in](/auth): Sign in or create an AskNCERT account.

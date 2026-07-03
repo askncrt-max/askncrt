@@ -11,6 +11,23 @@ import { listNotes, deleteNote } from "@/lib/notes.functions";
 
 export const Route = createFileRoute("/_authenticated/notes")({
   component: NotesPage,
+  head: () => ({
+    meta: [
+      { title: "Notes — AskNCERT" },
+      {
+        name: "description",
+        content:
+          "Save, search and revisit your AI-generated NCERT study notes, summaries and formulas in one place.",
+      },
+      { property: "og:title", content: "Notes — AskNCERT" },
+      {
+        property: "og:description",
+        content: "Your saved NCERT study notes and summaries.",
+      },
+      { property: "og:url", content: "https://askncrt.lovable.app/notes" },
+    ],
+    links: [{ rel: "canonical", href: "https://askncrt.lovable.app/notes" }],
+  }),
 });
 
 function NotesPage() {
