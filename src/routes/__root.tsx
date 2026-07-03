@@ -88,26 +88,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Ask anything from NCERT. Chapter scans, question solver, quizzes, notes and reminders — all powered by AI.",
       },
-      { name: "description", content: "AskNCERT
-Your AI Study Partner for NCERT
-📚 Instant Answers
-📝 Homework Help
-🎯 Exam Preparation
-🤖 Powered by AI" },
-      { property: "og:description", content: "AskNCERT
-Your AI Study Partner for NCERT
-📚 Instant Answers
-📝 Homework Help
-🎯 Exam Preparation
-🤖 Powered by AI" },
-      { name: "twitter:description", content: "AskNCERT
-Your AI Study Partner for NCERT
-📚 Instant Answers
-📝 Homework Help
-🎯 Exam Preparation
-🤖 Powered by AI" },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/5dfc7526-8dd9-474a-864a-ddf2a6513bdc" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/5dfc7526-8dd9-474a-864a-ddf2a6513bdc" },
     ],
     links: [
       {
