@@ -8,6 +8,23 @@ import { lovable } from "@/integrations/lovable";
 export const Route = createFileRoute("/auth")({
   ssr: false,
   component: AuthPage,
+  head: () => ({
+    meta: [
+      { title: "Sign in — AskNCERT" },
+      {
+        name: "description",
+        content:
+          "Sign in or create an AskNCERT account to access your AI study assistant, saved notes, and study planner.",
+      },
+      { property: "og:title", content: "Sign in — AskNCERT" },
+      {
+        property: "og:description",
+        content: "Access your AskNCERT AI study assistant for NCERT Class 5-12.",
+      },
+      { property: "og:url", content: "https://askncrt.lovable.app/auth" },
+    ],
+    links: [{ rel: "canonical", href: "https://askncrt.lovable.app/auth" }],
+  }),
 });
 
 function AuthPage() {
