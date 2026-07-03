@@ -226,6 +226,7 @@ function ChatPage() {
                         })
                       }
                       className="rounded-full p-0.5 hover:bg-muted"
+                      aria-label="Remove attachment"
                     >
                       <X className="size-3" />
                     </button>
