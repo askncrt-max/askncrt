@@ -27,6 +27,23 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/chat")({
   component: ChatPage,
+  head: () => ({
+    meta: [
+      { title: "Chat — AskNCERT" },
+      {
+        name: "description",
+        content:
+          "Chat with AskNCERT's AI tutor: ask NCERT questions, upload chapter photos or PDFs, and get instant explanations.",
+      },
+      { property: "og:title", content: "Chat — AskNCERT" },
+      {
+        property: "og:description",
+        content: "Ask NCERT questions and get instant AI-powered explanations.",
+      },
+      { property: "og:url", content: "https://askncrt.lovable.app/chat" },
+    ],
+    links: [{ rel: "canonical", href: "https://askncrt.lovable.app/chat" }],
+  }),
 });
 
 const SUGGESTIONS = [
