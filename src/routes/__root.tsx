@@ -82,24 +82,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "AskNCERT — AI study assistant for NCERT students" },
-      { name: "description", content: "AskNCERT
-Your AI Study Partner for NCERT
-📚 Instant Answers
-📝 Homework Help
-🎯 Exam Preparation
-🤖 Powered by AI" },
-      { property: "og:description", content: "AskNCERT
-Your AI Study Partner for NCERT
-📚 Instant Answers
-📝 Homework Help
-🎯 Exam Preparation
-🤖 Powered by AI" },
-      { name: "twitter:description", content: "AskNCERT
-Your AI Study Partner for NCERT
-📚 Instant Answers
-📝 Homework Help
-🎯 Exam Preparation
-🤖 Powered by AI" },
+      { name: "description", content: "AskNCERT — Your AI Study Partner for NCERT. 📚 Instant Answers · 📝 Homework Help · 🎯 Exam Preparation · 🤖 Powered by AI" },
+      { property: "og:description", content: "AskNCERT — Your AI Study Partner for NCERT. 📚 Instant Answers · 📝 Homework Help · 🎯 Exam Preparation · 🤖 Powered by AI" },
+      { name: "twitter:description", content: "AskNCERT — Your AI Study Partner for NCERT. 📚 Instant Answers · 📝 Homework Help · 🎯 Exam Preparation · 🤖 Powered by AI" },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/88be309a-0c85-43c4-8790-085b72e9e8b4" },
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/88be309a-0c85-43c4-8790-085b72e9e8b4" },
     ],
