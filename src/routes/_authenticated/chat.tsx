@@ -382,6 +382,15 @@ function ChatMessage({
   const filesShown = message.parts.filter((p): p is FileUIPart => p.type === "file");
   const isUser = message.role === "user";
 
+  // Collect web_search tool results as clickable sources
+  const sources: SourceItem[] = [];
+  for (const p of message.parts as Array<{ type: string; state?: string; output?: unknown }>) {
+    if (p.type === "tool-web_search" && (p.state === "output-available" || p.state === "result")) {
+      const out = p.output as { results?: SourceItem[] } | undefined;
+      if (out?.results && Array.isArray(out.results)) sources.push(...out.results);
+    }
+  }
+
   const save = useServerFn(saveNote);
   const saveMut = useMutation({
     mutationFn: async () => {
