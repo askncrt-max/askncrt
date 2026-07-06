@@ -16,12 +16,12 @@ import {
   FileText,
   Image as ImageIcon,
 } from "lucide-react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/app-shell";
+import { MarkdownMessage } from "@/components/markdown-message";
+import { Sources, type SourceItem } from "@/components/sources";
 import { saveNote } from "@/lib/notes.functions";
 import { cn } from "@/lib/utils";
 
@@ -382,6 +382,15 @@ function ChatMessage({
   const filesShown = message.parts.filter((p): p is FileUIPart => p.type === "file");
   const isUser = message.role === "user";
 
+  // Collect web_search tool results as clickable sources
+  const sources: SourceItem[] = [];
+  for (const p of message.parts as Array<{ type: string; state?: string; output?: unknown }>) {
+    if (p.type === "tool-web_search" && (p.state === "output-available" || p.state === "result")) {
+      const out = p.output as { results?: SourceItem[] } | undefined;
+      if (out?.results && Array.isArray(out.results)) sources.push(...out.results);
+    }
+  }
+
   const save = useServerFn(saveNote);
   const saveMut = useMutation({
     mutationFn: async () => {
@@ -430,9 +439,8 @@ function ChatMessage({
         <Sparkles className="size-4 text-primary-foreground" />
       </div>
       <div className="min-w-0 flex-1">
-        <div className="prose-chat">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
-        </div>
+        <MarkdownMessage>{text}</MarkdownMessage>
+        <Sources items={sources} />
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
           <button
             onClick={() => saveMut.mutate()}
