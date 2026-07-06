@@ -439,9 +439,8 @@ function ChatMessage({
         <Sparkles className="size-4 text-primary-foreground" />
       </div>
       <div className="min-w-0 flex-1">
-        <div className="prose-chat">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
-        </div>
+        <MarkdownMessage>{text}</MarkdownMessage>
+        <Sources items={sources} />
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
           <button
             onClick={() => saveMut.mutate()}
