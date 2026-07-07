@@ -339,6 +339,24 @@ function ChatPage() {
   );
 }
 
+function PersonalizedPill() {
+  const list = useServerFn(listMemory);
+  const { data } = useQuery({
+    queryKey: ["user_memory"],
+    queryFn: () => list(),
+    staleTime: 60_000,
+  });
+  if (!data || data.length === 0) return null;
+  return (
+    <span
+      title={`Personalized with ${data.length} memor${data.length === 1 ? "y" : "ies"}`}
+      className="inline-flex items-center gap-1 rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-primary"
+    >
+      <Sparkles className="size-2.5" /> Personalized
+    </span>
+  );
+}
+
 function Welcome({ onPick }: { onPick: (hint: string) => void }) {
   return (
     <div className="animate-fade-up my-auto flex flex-col items-center py-10 text-center">
