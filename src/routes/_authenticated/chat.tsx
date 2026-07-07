@@ -17,12 +17,13 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/app-shell";
 import { MarkdownMessage } from "@/components/markdown-message";
 import { Sources, type SourceItem } from "@/components/sources";
 import { saveNote } from "@/lib/notes.functions";
+import { listMemory } from "@/lib/user-memory.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/chat")({
@@ -172,14 +173,17 @@ function ChatPage() {
     <AppShell>
       <div className="flex h-[100dvh] flex-col md:h-screen">
         {/* Top bar */}
-        <div className="flex items-center justify-between border-b border-border bg-background/60 px-4 py-3 backdrop-blur-xl md:px-8">
-          <div className="hidden text-sm font-medium text-muted-foreground md:block">
-            {messages.length ? "Current conversation" : "New chat"}
+        <div className="flex items-center justify-between gap-2 border-b border-border bg-background/60 px-4 py-3 backdrop-blur-xl md:px-8">
+          <div className="flex items-center gap-2">
+            <div className="hidden text-sm font-medium text-muted-foreground md:block">
+              {messages.length ? "Current conversation" : "New chat"}
+            </div>
+            <PersonalizedPill />
           </div>
           {messages.length > 0 && (
             <button
               onClick={newChat}
-              className="ml-auto rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium hover:bg-muted"
+              className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium hover:bg-muted"
             >
               + New chat
             </button>
@@ -332,6 +336,24 @@ function ChatPage() {
 
       <QuickActionsFooter onAction={(a) => submit(a)} visible={messages.length > 0} actions={QUICK_ACTIONS} />
     </AppShell>
+  );
+}
+
+function PersonalizedPill() {
+  const list = useServerFn(listMemory);
+  const { data } = useQuery({
+    queryKey: ["user_memory"],
+    queryFn: () => list(),
+    staleTime: 60_000,
+  });
+  if (!data || data.length === 0) return null;
+  return (
+    <span
+      title={`Personalized with ${data.length} memor${data.length === 1 ? "y" : "ies"}`}
+      className="inline-flex items-center gap-1 rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-primary"
+    >
+      <Sparkles className="size-2.5" /> Personalized
+    </span>
   );
 }
 

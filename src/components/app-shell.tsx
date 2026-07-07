@@ -1,5 +1,5 @@
 import { Link, useLocation, useRouter } from "@tanstack/react-router";
-import { MessageSquare, BookOpen, Calendar, Settings, LogOut, Sparkles, Menu } from "lucide-react";
+import { MessageSquare, BookOpen, Calendar, Settings, LogOut, Sparkles, Menu, Brain } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -9,6 +9,7 @@ const nav = [
   { to: "/chat", label: "Chat", icon: MessageSquare },
   { to: "/notes", label: "Saved Notes", icon: BookOpen },
   { to: "/planner", label: "Study Planner", icon: Calendar },
+  { to: "/settings/memory", label: "AI Memory", icon: Brain },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 
@@ -25,6 +26,11 @@ export function AppShell({ children }: { children: ReactNode }) {
     router.navigate({ to: "/auth", replace: true });
   }
 
+  function isActive(to: string) {
+    if (to === "/settings") return location.pathname === "/settings";
+    return location.pathname === to || location.pathname.startsWith(to + "/");
+  }
+
   return (
     <div className="relative min-h-screen bg-background text-foreground">
       {/* Ambient mesh */}
@@ -38,7 +44,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Brand className="px-5 py-5" />
         <nav className="flex-1 space-y-1 px-3">
           {nav.map((item) => {
-            const active = location.pathname === item.to || location.pathname.startsWith(item.to + "/");
+            const active = isActive(item.to);
             const Icon = item.icon;
             return (
               <Link

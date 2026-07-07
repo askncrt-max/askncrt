@@ -109,29 +109,41 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          board: string | null
           class_level: string | null
           created_at: string
           display_name: string | null
+          goals: string | null
           id: string
           language: string
+          learning_style: string | null
+          subjects: string[]
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
+          board?: string | null
           class_level?: string | null
           created_at?: string
           display_name?: string | null
+          goals?: string | null
           id: string
           language?: string
+          learning_style?: string | null
+          subjects?: string[]
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
+          board?: string | null
           class_level?: string | null
           created_at?: string
           display_name?: string | null
+          goals?: string | null
           id?: string
           language?: string
+          learning_style?: string | null
+          subjects?: string[]
           updated_at?: string
         }
         Relationships: []
@@ -169,6 +181,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_memory: {
+        Row: {
+          category: Database["public"]["Enums"]["memory_category"]
+          created_at: string
+          id: string
+          key: string
+          source: Database["public"]["Enums"]["memory_source"]
+          updated_at: string
+          user_id: string
+          value: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["memory_category"]
+          created_at?: string
+          id?: string
+          key: string
+          source?: Database["public"]["Enums"]["memory_source"]
+          updated_at?: string
+          user_id: string
+          value: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["memory_category"]
+          created_at?: string
+          id?: string
+          key?: string
+          source?: Database["public"]["Enums"]["memory_source"]
+          updated_at?: string
+          user_id?: string
+          value?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -177,7 +222,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      memory_category: "profile" | "preference" | "goal" | "fact"
+      memory_source: "manual" | "inferred"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -304,6 +350,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      memory_category: ["profile", "preference", "goal", "fact"],
+      memory_source: ["manual", "inferred"],
+    },
   },
 } as const
