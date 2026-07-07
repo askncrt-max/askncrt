@@ -162,16 +162,16 @@ export const Route = createFileRoute("/api/chat")({
               }),
               execute: async ({ key, value, category }) => {
                 try {
-                  const { error } = await sb.from("user_memory").upsert(
-                    {
-                      user_id: uid,
-                      key,
-                      value,
-                      category,
-                      source: "inferred",
-                    },
-                    { onConflict: "user_id,key" },
-                  );
+                  const row: any = {
+                    user_id: uid,
+                    key,
+                    value,
+                    category,
+                    source: "inferred",
+                  };
+                  const { error } = await sb
+                    .from("user_memory")
+                    .upsert(row, { onConflict: "user_id,key" });
                   if (error) return { ok: false, error: error.message };
                   return { ok: true };
                 } catch (e) {
