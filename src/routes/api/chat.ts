@@ -53,7 +53,7 @@ export const Route = createFileRoute("/api/chat")({
           // Load memory for the signed-in user (best-effort; no auth = anonymous mode)
           let memoryBlock = "";
           let userId: string | undefined;
-          let userSb: ReturnType<typeof createClient> | null = null;
+          let userSb: SupabaseClient<Database> | null = null;
           try {
             const authHeader = request.headers.get("authorization");
             if (authHeader?.startsWith("Bearer ")) {
