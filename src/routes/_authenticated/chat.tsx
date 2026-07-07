@@ -17,12 +17,13 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/app-shell";
 import { MarkdownMessage } from "@/components/markdown-message";
 import { Sources, type SourceItem } from "@/components/sources";
 import { saveNote } from "@/lib/notes.functions";
+import { listMemory } from "@/lib/user-memory.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/chat")({
