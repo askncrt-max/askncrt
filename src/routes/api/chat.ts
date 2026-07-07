@@ -58,7 +58,7 @@ export const Route = createFileRoute("/api/chat")({
             const authHeader = request.headers.get("authorization");
             if (authHeader?.startsWith("Bearer ")) {
               const token = authHeader.slice(7);
-              userSb = createClient(
+              userSb = createClient<Database>(
                 process.env.SUPABASE_URL!,
                 process.env.SUPABASE_PUBLISHABLE_KEY!,
                 {
