@@ -173,14 +173,17 @@ function ChatPage() {
     <AppShell>
       <div className="flex h-[100dvh] flex-col md:h-screen">
         {/* Top bar */}
-        <div className="flex items-center justify-between border-b border-border bg-background/60 px-4 py-3 backdrop-blur-xl md:px-8">
-          <div className="hidden text-sm font-medium text-muted-foreground md:block">
-            {messages.length ? "Current conversation" : "New chat"}
+        <div className="flex items-center justify-between gap-2 border-b border-border bg-background/60 px-4 py-3 backdrop-blur-xl md:px-8">
+          <div className="flex items-center gap-2">
+            <div className="hidden text-sm font-medium text-muted-foreground md:block">
+              {messages.length ? "Current conversation" : "New chat"}
+            </div>
+            <PersonalizedPill />
           </div>
           {messages.length > 0 && (
             <button
               onClick={newChat}
-              className="ml-auto rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium hover:bg-muted"
+              className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium hover:bg-muted"
             >
               + New chat
             </button>
