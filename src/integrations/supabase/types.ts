@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          code: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           created_at: string
@@ -33,6 +54,69 @@ export type Database = {
           created_at?: string
           id?: string
           title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      exams: {
+        Row: {
+          created_at: string
+          exam_date: string
+          id: string
+          name: string
+          subject: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          exam_date: string
+          id?: string
+          name: string
+          subject?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          exam_date?: string
+          id?: string
+          name?: string
+          subject?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      goals: {
+        Row: {
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["goal_kind"]
+          period_start: string
+          subject: string | null
+          target_min: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["goal_kind"]
+          period_start?: string
+          subject?: string | null
+          target_min?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["goal_kind"]
+          period_start?: string
+          subject?: string | null
+          target_min?: number
           updated_at?: string
           user_id?: string
         }
@@ -106,6 +190,65 @@ export type Database = {
         }
         Relationships: []
       }
+      planner_tasks: {
+        Row: {
+          created_at: string
+          duration_min: number
+          exam_id: string | null
+          id: string
+          is_revision: boolean
+          notes: string | null
+          priority: Database["public"]["Enums"]["task_priority"]
+          scheduled_for: string
+          scheduled_time: string | null
+          status: Database["public"]["Enums"]["task_status"]
+          subject: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_min?: number
+          exam_id?: string | null
+          id?: string
+          is_revision?: boolean
+          notes?: string | null
+          priority?: Database["public"]["Enums"]["task_priority"]
+          scheduled_for: string
+          scheduled_time?: string | null
+          status?: Database["public"]["Enums"]["task_status"]
+          subject?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_min?: number
+          exam_id?: string | null
+          id?: string
+          is_revision?: boolean
+          notes?: string | null
+          priority?: Database["public"]["Enums"]["task_priority"]
+          scheduled_for?: string
+          scheduled_time?: string | null
+          status?: Database["public"]["Enums"]["task_status"]
+          subject?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planner_tasks_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -155,7 +298,10 @@ export type Database = {
           description: string | null
           due_at: string
           id: string
+          notify_at: string | null
+          push_enabled: boolean
           reminder_type: string
+          repeat: Database["public"]["Enums"]["reminder_repeat"]
           title: string
           user_id: string
         }
@@ -165,7 +311,10 @@ export type Database = {
           description?: string | null
           due_at: string
           id?: string
+          notify_at?: string | null
+          push_enabled?: boolean
           reminder_type?: string
+          repeat?: Database["public"]["Enums"]["reminder_repeat"]
           title: string
           user_id: string
         }
@@ -175,8 +324,44 @@ export type Database = {
           description?: string | null
           due_at?: string
           id?: string
+          notify_at?: string | null
+          push_enabled?: boolean
           reminder_type?: string
+          repeat?: Database["public"]["Enums"]["reminder_repeat"]
           title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      study_sessions: {
+        Row: {
+          created_at: string
+          duration_min: number
+          ended_at: string | null
+          id: string
+          kind: string
+          started_at: string
+          subject: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_min?: number
+          ended_at?: string | null
+          id?: string
+          kind?: string
+          started_at?: string
+          subject?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_min?: number
+          ended_at?: string | null
+          id?: string
+          kind?: string
+          started_at?: string
+          subject?: string | null
           user_id?: string
         }
         Relationships: []
@@ -222,8 +407,12 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      goal_kind: "weekly" | "monthly"
       memory_category: "profile" | "preference" | "goal" | "fact"
       memory_source: "manual" | "inferred"
+      reminder_repeat: "none" | "daily" | "weekly"
+      task_priority: "low" | "med" | "high"
+      task_status: "pending" | "done" | "missed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -351,8 +540,12 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      goal_kind: ["weekly", "monthly"],
       memory_category: ["profile", "preference", "goal", "fact"],
       memory_source: ["manual", "inferred"],
+      reminder_repeat: ["none", "daily", "weekly"],
+      task_priority: ["low", "med", "high"],
+      task_status: ["pending", "done", "missed"],
     },
   },
 } as const
