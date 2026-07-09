@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useChat } from "@ai-sdk/react";
+import { useStudyTracker } from "@/lib/use-study-tracker";
 import { DefaultChatTransport, type UIMessage, type FileUIPart } from "ai";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -75,6 +76,7 @@ function ChatPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
+  const { ping: pingStudy } = useStudyTracker("chat");
 
   const { messages, sendMessage, status, setMessages } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
@@ -129,6 +131,7 @@ function ChatPage() {
       });
     }
 
+    pingStudy();
     await sendMessage({
       text: content || "Please analyze the attached file.",
       files: parts.length ? parts : undefined,

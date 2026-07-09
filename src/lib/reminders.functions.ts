@@ -15,9 +15,12 @@ export const listReminders = createServerFn({ method: "GET" })
 
 const CreateInput = z.object({
   title: z.string().min(1).max(200),
-  description: z.string().max(1000).optional(),
-  reminder_type: z.enum(["study", "homework", "exam", "goal"]),
+  description: z.string().max(1000).optional().nullable(),
+  reminder_type: z.enum(["study", "homework", "exam", "goal"]).default("study"),
   due_at: z.string(),
+  repeat: z.enum(["none", "daily", "weekly"]).default("none"),
+  push_enabled: z.boolean().default(false),
+  notify_at: z.string().nullable().optional(),
 });
 
 export const createReminder = createServerFn({ method: "POST" })
