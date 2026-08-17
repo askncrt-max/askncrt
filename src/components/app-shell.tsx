@@ -1,5 +1,5 @@
 import { Link, useLocation, useRouter } from "@tanstack/react-router";
-import { MessageSquare, BookOpen, Calendar, Settings, LogOut, Sparkles, Menu, Brain, LayoutDashboard, Bell } from "lucide-react";
+import { MessageSquare, BookOpen, Calendar, Settings, LogOut, Sparkles, Menu, Brain, LayoutDashboard, Bell, GraduationCap } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 const nav = [
   { to: "/chat", label: "Chat", icon: MessageSquare },
   { to: "/dashboard", label: "Progress", icon: LayoutDashboard },
+  { to: "/quiz", label: "Quiz", icon: GraduationCap },
   { to: "/notes", label: "Saved Notes", icon: BookOpen },
   { to: "/planner", label: "Study Planner", icon: Calendar },
   { to: "/reminders", label: "Reminders", icon: Bell },
