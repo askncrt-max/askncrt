@@ -125,28 +125,34 @@ export type Database = {
       messages: {
         Row: {
           attachments: Json
+          client_id: string | null
           content: string
           conversation_id: string
           created_at: string
           id: string
+          parts: Json
           role: string
           user_id: string
         }
         Insert: {
           attachments?: Json
+          client_id?: string | null
           content: string
           conversation_id: string
           created_at?: string
           id?: string
+          parts?: Json
           role: string
           user_id: string
         }
         Update: {
           attachments?: Json
+          client_id?: string | null
           content?: string
           conversation_id?: string
           created_at?: string
           id?: string
+          parts?: Json
           role?: string
           user_id?: string
         }
