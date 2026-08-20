@@ -13,6 +13,7 @@ import {
   Zap,
   FileText,
   Image as ImageIcon,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -72,7 +73,7 @@ export function ChatWindow({
   const persist = useServerFn(saveTurn);
   const messagesRef = useRef<UIMessage[]>(initialMessages);
 
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, status, regenerate } = useChat({
     id: threadId,
     messages: initialMessages,
     transport: new DefaultChatTransport({ api: "/api/chat" }),
@@ -211,7 +212,16 @@ export function ChatWindow({
           ) : (
             <div className="space-y-6">
               {messages.map((m) => (
-                <ChatMessage key={m.id} message={m} onQuickAction={(a) => submit(a)} />
+                <ChatMessage
+                  key={m.id}
+                  message={m}
+                  onQuickAction={(a) => submit(a)}
+                  onRegenerate={() => {
+                    pingStudy();
+                    regenerate({ messageId: m.id });
+                  }}
+                  busy={isLoading}
+                />
               ))}
               {isLoading && messages[messages.length - 1]?.role === "user" && <Thinking />}
             </div>
@@ -394,9 +404,13 @@ function Welcome({ onPick }: { onPick: (hint: string) => void }) {
 function ChatMessage({
   message,
   onQuickAction,
+  onRegenerate,
+  busy,
 }: {
   message: UIMessage;
   onQuickAction: (a: string) => void;
+  onRegenerate: () => void;
+  busy: boolean;
 }) {
   const text = message.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
   const filesShown = message.parts.filter((p): p is FileUIPart => p.type === "file");
@@ -462,6 +476,15 @@ function ChatMessage({
             className="rounded-full border border-border bg-card px-2.5 py-1 text-[11px] font-medium hover:border-primary/40 hover:text-primary disabled:opacity-50"
           >
             {saveMut.isPending ? "Saving…" : "💾 Save note"}
+          </button>
+          <button
+            onClick={onRegenerate}
+            disabled={busy}
+            title="Regenerate this answer"
+            aria-label="Regenerate this answer"
+            className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-[11px] font-medium hover:border-primary/40 hover:text-primary disabled:opacity-50"
+          >
+            <RefreshCw className="size-3" /> Regenerate
           </button>
           {QUICK_ACTIONS.map((a) => (
             <button
