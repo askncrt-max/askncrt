@@ -240,7 +240,7 @@ export function ChatWindow({
                   className="group relative flex items-center gap-2 rounded-xl border border-border bg-card px-2.5 py-1.5 text-xs"
                 >
                   {a.file.type.startsWith("image/") ? (
-                    <img src={a.url} alt="" className="size-8 rounded-md object-cover" />
+                    <img src={a.url} alt="Attached study image preview" className="size-8 rounded-md object-cover" />
                   ) : (
                     <FileText className="size-4 text-primary" />
                   )}
@@ -442,7 +442,7 @@ function ChatMessage({
             <div className="mb-2 flex flex-wrap gap-1.5">
               {filesShown.map((f, i) =>
                 f.mediaType?.startsWith("image/") && f.url ? (
-                  <img key={i} src={f.url} alt={f.filename || ""} className="max-h-40 rounded-xl" />
+                  <img key={i} src={f.url} alt="Uploaded study material shared with the AI tutor" className="max-h-40 rounded-xl" />
                 ) : (
                   <div
                     key={i}
