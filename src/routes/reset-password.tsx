@@ -7,7 +7,27 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/reset-password")({
   ssr: false,
   component: ResetPassword,
+  head: () => ({
+    meta: [
+      { title: "Reset your password — AskNCERT" },
+      {
+        name: "description",
+        content:
+          "Set a new password for your AskNCERT account and get back to your NCERT chats, notes, quizzes and study planner in seconds.",
+      },
+      { property: "og:title", content: "Reset your password — AskNCERT" },
+      {
+        property: "og:description",
+        content:
+          "Choose a new password for your AskNCERT account and return to your NCERT study space.",
+      },
+      { property: "og:url", content: "https://askncrt.lovable.app/reset-password" },
+      { property: "og:type", content: "website" },
+    ],
+    links: [{ rel: "canonical", href: "https://askncrt.lovable.app/reset-password" }],
+  }),
 });
+
 
 function ResetPassword() {
   const navigate = useNavigate();
