@@ -36,12 +36,36 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
+function prettyLabel(href?: string): string {
+  if (!href) return "Source";
+  try {
+    const host = new URL(href).hostname.replace(/^www\./, "");
+    if (host.endsWith("gov.in") || host.endsWith(".gov")) return "Official Government Source";
+    if (host.includes("ncert") || host.includes("cbse")) return "NCERT / CBSE Source";
+    return host;
+  } catch {
+    return "Source";
+  }
+}
+
 const components: Components = {
-  a: ({ href, children, ...rest }) => (
-    <a href={href} target="_blank" rel="noopener noreferrer" {...rest}>
-      {children}
-    </a>
-  ),
+  a: ({ href, children, ...rest }) => {
+    const raw = typeof children === "string" ? children : Array.isArray(children) ? children.join("") : "";
+    const looksLikeUrl = /^(https?:\/\/|www\.)/i.test(raw.trim()) || raw.trim().length > 60;
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={href}
+        className="citation-link"
+        {...rest}
+      >
+        {looksLikeUrl || !raw.trim() ? prettyLabel(href) : children}
+      </a>
+    );
+  },
+
   table: ({ children, ...rest }) => (
     <div className="table-scroll">
       <table {...rest}>{children}</table>
