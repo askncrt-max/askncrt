@@ -442,7 +442,7 @@ function ChatMessage({
             <div className="mb-2 flex flex-wrap gap-1.5">
               {filesShown.map((f, i) =>
                 f.mediaType?.startsWith("image/") && f.url ? (
-                  <img key={i} src={f.url} alt={f.filename || ""} className="max-h-40 rounded-xl" />
+                  <img key={i} src={f.url} alt="Uploaded study material shared with the AI tutor" className="max-h-40 rounded-xl" />
                 ) : (
                   <div
                     key={i}
