@@ -206,10 +206,43 @@ export const Route = createFileRoute("/api/chat")({
             });
           }
 
+          // ---- Runtime directives: date awareness, volatility check, owner question ----
+          const now = new Date();
+          const todayBlock = `\n\nTODAY'S DATE: ${now.toLocaleDateString("en-IN", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            timeZone: "Asia/Kolkata",
+          })} (IST). Treat any date before this as historical and any date after it as future.`;
+
+          const lastUserText = [...body.messages]
+            .reverse()
+            .find((m) => m.role === "user")
+            ?.parts.map((p: any) => (p?.type === "text" ? p.text : ""))
+            .join(" ")
+            .toLowerCase() ?? "";
+
+          const VOLATILE =
+            /\b(current|currently|latest|today|todays|now|present|recent|nowadays|this year|aaj|abhi|news|update|updated|price|score|result|winner|live)\b|\b(chief minister|prime minister|president|governor|minister|cm|pm|mla|mp|ceo|chairman|chairperson|captain|mayor)\b/;
+          const volatileBlock =
+            VOLATILE.test(lastUserText) && firecrawlKey
+              ? "\n\nCRITICAL FOR THIS TURN: this question is time-sensitive or asks about an office holder. You MUST call web_search BEFORE answering and base the answer on those results. Do not answer from memory. If search fails, say the information could not be verified."
+              : "";
+
+          const OWNER_Q =
+            /(who|kisne|kaun).{0,40}(created|create|made|make|built|build|developed|develop|owns|owner|founder|found|behind|banaya)/.test(
+              lastUserText,
+            ) && /askncert|ask ncert|askncrt|this app|is app|yeh app/.test(lastUserText);
+          const ownerBlock = OWNER_Q
+            ? '\n\nTHIS TURN: the user is asking who created/owns AskNCERT. Answer exactly: "AskNCERT was created by Dhiraj Bhale." You may add one short friendly sentence, but never change the name.'
+            : "";
+
           const result = streamText({
             model,
-            system: BASE_SYSTEM + memoryBlock,
+            system: BASE_SYSTEM + todayBlock + memoryBlock + volatileBlock + ownerBlock,
             messages: await convertToModelMessages(body.messages),
+
             tools: Object.keys(tools).length ? tools : undefined,
             stopWhen: stepCountIs(50),
           });
