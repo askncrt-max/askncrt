@@ -224,6 +224,27 @@
   font-weight: 500;
 }
 .prose-chat a:hover { text-decoration-thickness: 2px; }
+.prose-chat a.citation-link {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  gap: 0.25em;
+  padding: 0.05em 0.5em;
+  margin: 0 0.1em;
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  border: 1px solid color-mix(in oklch, var(--color-primary) 25%, transparent);
+  font-size: 0.8em;
+  font-weight: 600;
+  line-height: 1.5;
+  text-decoration: none;
+}
+.prose-chat a.citation-link:hover {
+  text-decoration: none;
+  background: color-mix(in oklch, var(--color-primary) 18%, transparent);
+}
+
 .prose-chat blockquote {
   border-left: 3px solid var(--color-primary);
   background: var(--color-primary-soft);
