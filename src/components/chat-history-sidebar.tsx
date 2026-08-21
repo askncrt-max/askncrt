@@ -1,9 +1,9 @@
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Plus, MessageSquare, Trash2, Pencil, Check, X, History } from "lucide-react";
+import { Plus, MessageSquare, Trash2, Pencil, History, MoreHorizontal } from "lucide-react";
 import {
   listConversations,
   startConversation,
@@ -28,8 +28,18 @@ export function ChatHistorySidebar({ className }: { className?: string }) {
     queryFn: () => list(),
   });
 
-  const [editing, setEditing] = useState<string | null>(null);
+  const [menuFor, setMenuFor] = useState<string | null>(null);
+  const [renaming, setRenaming] = useState<{ id: string; title: string } | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<{ id: string; title: string } | null>(null);
   const [draft, setDraft] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!menuFor) return;
+    const close = () => setMenuFor(null);
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  }, [menuFor]);
 
   async function newChat() {
     try {
@@ -41,18 +51,40 @@ export function ChatHistorySidebar({ className }: { className?: string }) {
     }
   }
 
-  async function commitRename(id: string) {
+  async function commitRename() {
+    const target = renaming;
     const title = draft.trim();
-    setEditing(null);
-    if (!title) return;
-    await rename({ data: { id, title } });
-    qc.invalidateQueries({ queryKey: ["conversations"] });
+    if (!target || !title) {
+      setRenaming(null);
+      return;
+    }
+    setBusy(true);
+    try {
+      await rename({ data: { id: target.id, title } });
+      await qc.invalidateQueries({ queryKey: ["conversations"] });
+      await qc.invalidateQueries({ queryKey: ["conversation", target.id] });
+      setRenaming(null);
+      toast.success("Chat renamed");
+    } catch (e: any) {
+      toast.error(e?.message || "Couldn't rename this chat");
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function onDelete(id: string) {
-    await remove({ data: { id } });
-    await qc.invalidateQueries({ queryKey: ["conversations"] });
-    if (activeId === id) navigate({ to: "/chat" });
+    setBusy(true);
+    try {
+      await remove({ data: { id } });
+      await qc.invalidateQueries({ queryKey: ["conversations"] });
+      setConfirmDelete(null);
+      toast.success("Chat deleted");
+      if (activeId === id) navigate({ to: "/chat" });
+    } catch (e: any) {
+      toast.error(e?.message || "Couldn't delete this chat");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -94,41 +126,11 @@ export function ChatHistorySidebar({ className }: { className?: string }) {
 
         {conversations.map((c: any) => {
           const active = c.id === activeId;
-          if (editing === c.id) {
-            return (
-              <div key={c.id} className="flex items-center gap-1 px-1 py-0.5">
-                <input
-                  autoFocus
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") commitRename(c.id);
-                    if (e.key === "Escape") setEditing(null);
-                  }}
-                  className="min-w-0 flex-1 rounded-lg border border-border bg-background px-2 py-1.5 text-xs outline-none"
-                />
-                <button
-                  onClick={() => commitRename(c.id)}
-                  aria-label="Save title"
-                  className="rounded-md p-1 hover:bg-muted"
-                >
-                  <Check className="size-3.5" />
-                </button>
-                <button
-                  onClick={() => setEditing(null)}
-                  aria-label="Cancel rename"
-                  className="rounded-md p-1 hover:bg-muted"
-                >
-                  <X className="size-3.5" />
-                </button>
-              </div>
-            );
-          }
           return (
             <div
               key={c.id}
               className={cn(
-                "group flex items-center gap-1 rounded-xl pr-1 transition-colors",
+                "group relative flex items-center gap-1 rounded-xl pr-1 transition-colors",
                 active ? "bg-primary-soft" : "hover:bg-muted/70",
               )}
             >
@@ -144,26 +146,135 @@ export function ChatHistorySidebar({ className }: { className?: string }) {
                 <span className="truncate">{c.title || "New chat"}</span>
               </Link>
               <button
-                onClick={() => {
-                  setEditing(c.id);
-                  setDraft(c.title || "");
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMenuFor((m) => (m === c.id ? null : c.id));
                 }}
-                aria-label="Rename chat"
-                className="rounded-md p-1 text-muted-foreground opacity-0 hover:bg-background hover:text-foreground group-hover:opacity-100"
+                aria-label="Chat options"
+                aria-haspopup="menu"
+                aria-expanded={menuFor === c.id}
+                className="rounded-md p-1 text-muted-foreground hover:bg-background hover:text-foreground"
               >
-                <Pencil className="size-3.5" />
+                <MoreHorizontal className="size-3.5" />
               </button>
-              <button
-                onClick={() => onDelete(c.id)}
-                aria-label="Delete chat"
-                className="rounded-md p-1 text-muted-foreground opacity-0 hover:bg-background hover:text-destructive group-hover:opacity-100"
-              >
-                <Trash2 className="size-3.5" />
-              </button>
+              {menuFor === c.id && (
+                <div
+                  role="menu"
+                  onClick={(e) => e.stopPropagation()}
+                  className="absolute right-1 top-9 z-30 w-36 overflow-hidden rounded-xl border border-border bg-card py-1 shadow-soft"
+                >
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      setMenuFor(null);
+                      setDraft(c.title || "");
+                      setRenaming({ id: c.id, title: c.title || "New chat" });
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium hover:bg-muted"
+                  >
+                    <Pencil className="size-3.5" /> Rename
+                  </button>
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      setMenuFor(null);
+                      setConfirmDelete({ id: c.id, title: c.title || "New chat" });
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="size-3.5" /> Delete
+                  </button>
+                </div>
+              )}
             </div>
           );
         })}
       </nav>
+
+      {renaming && (
+        <Modal onClose={() => setRenaming(null)} title="Rename chat">
+          <input
+            autoFocus
+            value={draft}
+            maxLength={120}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") commitRename();
+              if (e.key === "Escape") setRenaming(null);
+            }}
+            placeholder="e.g. Science Chapter 1"
+            className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary/50"
+          />
+          <div className="mt-4 flex justify-end gap-2">
+            <button
+              onClick={() => setRenaming(null)}
+              className="rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={commitRename}
+              disabled={busy || !draft.trim()}
+              className="rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-50"
+            >
+              Save
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {confirmDelete && (
+        <Modal onClose={() => setConfirmDelete(null)} title="Delete chat?">
+          <p className="text-xs text-muted-foreground">
+            “{confirmDelete.title}” and all of its messages will be permanently deleted. This can't
+            be undone.
+          </p>
+          <div className="mt-4 flex justify-end gap-2">
+            <button
+              onClick={() => setConfirmDelete(null)}
+              className="rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => onDelete(confirmDelete.id)}
+              disabled={busy}
+              className="rounded-full bg-destructive px-4 py-1.5 text-xs font-semibold text-destructive-foreground disabled:opacity-50"
+            >
+              Delete
+            </button>
+          </div>
+        </Modal>
+      )}
     </aside>
+  );
+}
+
+function Modal({
+  title,
+  children,
+  onClose,
+}: {
+  title: string;
+  children: React.ReactNode;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center p-4">
+      <button
+        aria-label="Close"
+        onClick={onClose}
+        className="absolute inset-0 bg-background/70 backdrop-blur-sm"
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className="animate-fade-up relative w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-soft"
+      >
+        <h2 className="mb-3 text-sm font-semibold">{title}</h2>
+        {children}
+      </div>
+    </div>
   );
 }
