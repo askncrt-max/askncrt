@@ -336,6 +336,23 @@ export function ChatWindow({
             </div>
           )}
 
+          {editingId && (
+            <div className="mb-2 flex items-center justify-between gap-2 rounded-xl border border-primary/40 bg-primary-soft px-3 py-1.5 text-[11px] font-medium text-primary">
+              <span>Editing your question — sending will replace the old answer.</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingId(null);
+                  setInput("");
+                }}
+                className="rounded-full p-0.5 hover:bg-primary/10"
+                aria-label="Cancel editing"
+              >
+                <X className="size-3" />
+              </button>
+            </div>
+          )}
+
           <form
             onSubmit={(e) => {
               e.preventDefault();
