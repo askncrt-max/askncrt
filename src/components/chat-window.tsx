@@ -14,6 +14,9 @@ import {
   FileText,
   Image as ImageIcon,
   RefreshCw,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -22,7 +25,11 @@ import { MarkdownMessage } from "@/components/markdown-message";
 import { Sources, type SourceItem } from "@/components/sources";
 import { saveNote } from "@/lib/notes.functions";
 import { listMemory } from "@/lib/user-memory.functions";
-import { saveTurn } from "@/lib/conversations.functions";
+import {
+  saveTurn,
+  deleteMessageTurn,
+  truncateFromMessage,
+} from "@/lib/conversations.functions";
 import { useStudyTracker } from "@/lib/use-study-tracker";
 import { cn } from "@/lib/utils";
 
@@ -53,10 +60,15 @@ export function ChatWindow({
   threadId,
   initialMessages,
   title,
+  guest = false,
+  onMessagesChange,
 }: {
   threadId: string;
   initialMessages: UIMessage[];
   title?: string | null;
+  /** Guest mode: nothing is persisted to the account, no personal features. */
+  guest?: boolean;
+  onMessagesChange?: (messages: UIMessage[]) => void;
 }) {
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [input, setInput] = useState("");
@@ -73,11 +85,16 @@ export function ChatWindow({
   const persist = useServerFn(saveTurn);
   const messagesRef = useRef<UIMessage[]>(initialMessages);
 
-  const { messages, sendMessage, status, regenerate } = useChat({
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const removeTurn = useServerFn(deleteMessageTurn);
+  const truncate = useServerFn(truncateFromMessage);
+
+  const { messages, sendMessage, status, regenerate, setMessages } = useChat({
     id: threadId,
     messages: initialMessages,
     transport: new DefaultChatTransport({ api: "/api/chat" }),
     onFinish: ({ message }) => {
+      if (guest) return;
       const prior = messagesRef.current;
       const lastUser = [...prior].reverse().find((m) => m.role === "user");
       const batch = [lastUser, message].filter(Boolean) as UIMessage[];
@@ -108,7 +125,8 @@ export function ChatWindow({
 
   useEffect(() => {
     messagesRef.current = messages;
-  }, [messages]);
+    onMessagesChange?.(messages);
+  }, [messages, onMessagesChange]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -146,6 +164,23 @@ export function ChatWindow({
     const content = (text ?? input).trim();
     if (!content && attachments.length === 0) return;
 
+    // Editing a previous question: drop it (and everything after) first, then
+    // resend the edited text so a fresh answer replaces the old one.
+    const editId = editingId;
+    if (editId) {
+      const idx = messagesRef.current.findIndex((m) => m.id === editId);
+      setEditingId(null);
+      if (!guest) {
+        try {
+          await truncate({ data: { conversationId: threadId, messageId: editId } });
+        } catch (e: any) {
+          toast.error(e?.message || "Couldn't update that question");
+          return;
+        }
+      }
+      if (idx >= 0) setMessages(messagesRef.current.slice(0, idx));
+    }
+
     const parts: FileUIPart[] = [];
     for (const att of attachments) {
       const dataUrl = await fileToDataURL(att.file);
@@ -157,7 +192,7 @@ export function ChatWindow({
       });
     }
 
-    pingStudy();
+    if (!guest) pingStudy();
     setInput("");
     attachments.forEach((a) => URL.revokeObjectURL(a.url));
     setAttachments([]);
@@ -165,6 +200,35 @@ export function ChatWindow({
       text: content || "Please analyze the attached file.",
       files: parts.length ? parts : undefined,
     });
+  }
+
+  function startEdit(m: UIMessage) {
+    const text = m.parts.map((p: any) => (p?.type === "text" ? p.text : "")).join("");
+    setEditingId(m.id);
+    setInput(text);
+    requestAnimationFrame(() => textareaRef.current?.focus());
+  }
+
+  async function deleteTurn(m: UIMessage) {
+    const current = messagesRef.current;
+    const idx = current.findIndex((x) => x.id === m.id);
+    if (idx < 0) return;
+    if (!guest) {
+      try {
+        await removeTurn({ data: { conversationId: threadId, messageId: m.id } });
+      } catch (e: any) {
+        toast.error(e?.message || "Couldn't delete that message");
+        return;
+      }
+    }
+    let end = idx + 1;
+    while (end < current.length && current[end]!.role === "assistant") end++;
+    setMessages([...current.slice(0, idx), ...current.slice(end)]);
+    if (editingId === m.id) {
+      setEditingId(null);
+      setInput("");
+    }
+    if (!guest) qc.invalidateQueries({ queryKey: ["conversations"] });
   }
 
   function toggleVoice() {
@@ -201,7 +265,13 @@ export function ChatWindow({
         <div className="min-w-0 flex-1 truncate text-sm font-medium text-muted-foreground">
           {title && title !== "New chat" ? title : messages.length ? "Current chat" : "New chat"}
         </div>
-        <PersonalizedPill />
+        {guest ? (
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Guest mode
+          </span>
+        ) : (
+          <PersonalizedPill />
+        )}
       </div>
 
       {/* Messages */}
@@ -215,9 +285,13 @@ export function ChatWindow({
                 <ChatMessage
                   key={m.id}
                   message={m}
+                  guest={guest}
+                  editing={editingId === m.id}
+                  onEdit={() => startEdit(m)}
+                  onDelete={() => deleteTurn(m)}
                   onQuickAction={(a) => submit(a)}
                   onRegenerate={() => {
-                    pingStudy();
+                    if (!guest) pingStudy();
                     regenerate({ messageId: m.id });
                   }}
                   busy={isLoading}
@@ -259,6 +333,23 @@ export function ChatWindow({
                   </button>
                 </div>
               ))}
+            </div>
+          )}
+
+          {editingId && (
+            <div className="mb-2 flex items-center justify-between gap-2 rounded-xl border border-primary/40 bg-primary-soft px-3 py-1.5 text-[11px] font-medium text-primary">
+              <span>Editing your question — sending will replace the old answer.</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingId(null);
+                  setInput("");
+                }}
+                className="rounded-full p-0.5 hover:bg-primary/10"
+                aria-label="Cancel editing"
+              >
+                <X className="size-3" />
+              </button>
             </div>
           )}
 
@@ -405,11 +496,19 @@ function ChatMessage({
   message,
   onQuickAction,
   onRegenerate,
+  onEdit,
+  onDelete,
+  editing,
+  guest,
   busy,
 }: {
   message: UIMessage;
   onQuickAction: (a: string) => void;
   onRegenerate: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  editing: boolean;
+  guest: boolean;
   busy: boolean;
 }) {
   const text = message.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
@@ -436,8 +535,14 @@ function ChatMessage({
 
   if (isUser) {
     return (
-      <div className="animate-fade-up flex justify-end">
-        <div className="max-w-[85%] rounded-3xl rounded-tr-md bg-primary px-4 py-2.5 text-primary-foreground">
+      <div className="animate-fade-up group flex items-start justify-end gap-1">
+        <MessageMenu onEdit={onEdit} onDelete={onDelete} disabled={busy} />
+        <div
+          className={cn(
+            "max-w-[85%] rounded-3xl rounded-tr-md bg-primary px-4 py-2.5 text-primary-foreground",
+            editing && "ring-2 ring-primary/40 ring-offset-2 ring-offset-background",
+          )}
+        >
           {filesShown.length > 0 && (
             <div className="mb-2 flex flex-wrap gap-1.5">
               {filesShown.map((f, i) =>
@@ -470,6 +575,7 @@ function ChatMessage({
         <MarkdownMessage>{text}</MarkdownMessage>
         <Sources items={sources} />
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          {!guest && (
           <button
             onClick={() => saveMut.mutate()}
             disabled={saveMut.isPending || !text}
@@ -477,6 +583,7 @@ function ChatMessage({
           >
             {saveMut.isPending ? "Saving…" : "💾 Save note"}
           </button>
+          )}
           <button
             onClick={onRegenerate}
             disabled={busy}
@@ -541,5 +648,69 @@ function IconBtn({
     >
       <Icon className="size-4" />
     </button>
+  );
+}
+
+function MessageMenu({
+  onEdit,
+  onDelete,
+  disabled,
+}: {
+  onEdit: () => void;
+  onDelete: () => void;
+  disabled?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = () => setOpen(false);
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  }, [open]);
+
+  return (
+    <div className="relative mt-1.5" onClick={(e) => e.stopPropagation()}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-label="Message options"
+        title="Message options"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className="grid size-7 place-items-center rounded-full text-muted-foreground opacity-0 transition-opacity hover:bg-muted focus-visible:opacity-100 group-hover:opacity-100 md:opacity-0"
+      >
+        <MoreHorizontal className="size-4" />
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 top-8 z-20 w-36 overflow-hidden rounded-xl border border-border bg-card py-1 shadow-soft"
+        >
+          <button
+            role="menuitem"
+            disabled={disabled}
+            onClick={() => {
+              setOpen(false);
+              onEdit();
+            }}
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium hover:bg-muted disabled:opacity-50"
+          >
+            <Pencil className="size-3.5" /> Edit
+          </button>
+          <button
+            role="menuitem"
+            disabled={disabled}
+            onClick={() => {
+              setOpen(false);
+              onDelete();
+            }}
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium text-destructive hover:bg-destructive/10 disabled:opacity-50"
+          >
+            <Trash2 className="size-3.5" /> Delete
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
