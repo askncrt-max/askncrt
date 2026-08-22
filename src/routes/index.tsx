@@ -110,6 +110,12 @@ function LandingPage() {
             >
               Start learning free →
             </Link>
+            <Link
+              to="/guest"
+              className="rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold hover:bg-muted"
+            >
+              Try as guest — no sign up
+            </Link>
             <a
               href="#features"
               className="rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold hover:bg-muted"

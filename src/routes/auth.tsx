@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -246,6 +246,13 @@ function AuthPage() {
             )}
           </div>
         </div>
+
+        <p className="mt-5 text-center text-xs">
+          <Link to="/guest" className="font-semibold text-primary hover:underline">
+            Continue as guest →
+          </Link>
+          <span className="ml-1 text-muted-foreground">(chat only, nothing is saved)</span>
+        </p>
 
         <p className="mt-6 text-center text-[11px] text-muted-foreground">
           Built for Indian NCERT students, built by Dhiraj
