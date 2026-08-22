@@ -535,7 +535,7 @@ function ChatMessage({
 
   if (isUser) {
     return (
-      <div className="animate-fade-up group flex items-start justify-end gap-1">
+      <div className="animate-fade-up group relative z-20 flex items-start justify-end gap-1">
         <MessageMenu onEdit={onEdit} onDelete={onDelete} disabled={busy} />
         <div
           className={cn(
