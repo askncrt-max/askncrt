@@ -535,7 +535,7 @@ function ChatMessage({
 
   if (isUser) {
     return (
-      <div className="animate-fade-up group flex items-start justify-end gap-1">
+      <div className="animate-fade-up group relative z-20 flex items-start justify-end gap-1">
         <MessageMenu onEdit={onEdit} onDelete={onDelete} disabled={busy} />
         <div
           className={cn(
@@ -670,7 +670,7 @@ function MessageMenu({
   }, [open]);
 
   return (
-    <div className="relative mt-1.5" onClick={(e) => e.stopPropagation()}>
+    <div className="relative z-40 mt-1.5" onClick={(e) => e.stopPropagation()}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -685,7 +685,7 @@ function MessageMenu({
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-8 z-20 w-36 overflow-hidden rounded-xl border border-border bg-card py-1 shadow-soft"
+          className="absolute right-0 top-8 z-50 w-36 overflow-hidden rounded-xl border border-border bg-card py-1 shadow-soft"
         >
           <button
             role="menuitem"
