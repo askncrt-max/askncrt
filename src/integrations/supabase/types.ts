@@ -35,6 +35,287 @@ export type Database = {
         }
         Relationships: []
       }
+      ad_settings: {
+        Row: {
+          clicks: number
+          created_at: string
+          enabled: boolean
+          frequency: number
+          id: string
+          impressions: number
+          placement: string
+          revenue_inr: number
+          show_to_free: boolean
+          show_to_premium: boolean
+          updated_at: string
+        }
+        Insert: {
+          clicks?: number
+          created_at?: string
+          enabled?: boolean
+          frequency?: number
+          id?: string
+          impressions?: number
+          placement: string
+          revenue_inr?: number
+          show_to_free?: boolean
+          show_to_premium?: boolean
+          updated_at?: string
+        }
+        Update: {
+          clicks?: number
+          created_at?: string
+          enabled?: boolean
+          frequency?: number
+          id?: string
+          impressions?: number
+          placement?: string
+          revenue_inr?: number
+          show_to_free?: boolean
+          show_to_premium?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      admin_questions: {
+        Row: {
+          answer: string | null
+          ask_count: number
+          chapter: string | null
+          class_level: number | null
+          created_at: string
+          difficulty: string
+          id: string
+          question: string
+          report_reason: string | null
+          reported: boolean
+          status: string
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          answer?: string | null
+          ask_count?: number
+          chapter?: string | null
+          class_level?: number | null
+          created_at?: string
+          difficulty?: string
+          id?: string
+          question: string
+          report_reason?: string | null
+          reported?: boolean
+          status?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          answer?: string | null
+          ask_count?: number
+          chapter?: string | null
+          class_level?: number | null
+          created_at?: string
+          difficulty?: string
+          id?: string
+          question?: string
+          report_reason?: string | null
+          reported?: boolean
+          status?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_providers: {
+        Row: {
+          created_at: string
+          daily_request_limit: number | null
+          enabled: boolean
+          id: string
+          max_retries: number
+          model: string
+          name: string
+          priority: number
+          timeout_ms: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          daily_request_limit?: number | null
+          enabled?: boolean
+          id?: string
+          max_retries?: number
+          model: string
+          name: string
+          priority?: number
+          timeout_ms?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          daily_request_limit?: number | null
+          enabled?: boolean
+          id?: string
+          max_retries?: number
+          model?: string
+          name?: string
+          priority?: number
+          timeout_ms?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_usage: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          error: string | null
+          id: string
+          input_tokens: number
+          kind: string
+          model: string
+          output_tokens: number
+          provider: string
+          success: boolean
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          id?: string
+          input_tokens?: number
+          kind?: string
+          model: string
+          output_tokens?: number
+          provider?: string
+          success?: boolean
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          id?: string
+          input_tokens?: number
+          kind?: string
+          model?: string
+          output_tokens?: number
+          provider?: string
+          success?: boolean
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          admin_email: string | null
+          admin_id: string | null
+          created_at: string
+          id: string
+          new_value: Json | null
+          previous_value: Json | null
+          result: string
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: string
+          admin_email?: string | null
+          admin_id?: string | null
+          created_at?: string
+          id?: string
+          new_value?: Json | null
+          previous_value?: Json | null
+          result?: string
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: string
+          admin_email?: string | null
+          admin_id?: string | null
+          created_at?: string
+          id?: string
+          new_value?: Json | null
+          previous_value?: Json | null
+          result?: string
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: []
+      }
+      chapters: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          published: boolean
+          sort_order: number
+          subject_id: string
+          topics: string[]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          published?: boolean
+          sort_order?: number
+          subject_id: string
+          topics?: string[]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          published?: boolean
+          sort_order?: number
+          subject_id?: string
+          topics?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chapters_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      classes: {
+        Row: {
+          created_at: string
+          id: string
+          level: number
+          name: string
+          published: boolean
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          level: number
+          name: string
+          published?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          level?: number
+          name?: string
+          published?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           created_at: string
@@ -59,6 +340,39 @@ export type Database = {
           title_custom?: boolean
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      emergency_settings: {
+        Row: {
+          ai_disabled: boolean
+          id: boolean
+          maintenance_mode: boolean
+          message: string
+          ocr_disabled: boolean
+          registrations_disabled: boolean
+          updated_at: string
+          uploads_disabled: boolean
+        }
+        Insert: {
+          ai_disabled?: boolean
+          id?: boolean
+          maintenance_mode?: boolean
+          message?: string
+          ocr_disabled?: boolean
+          registrations_disabled?: boolean
+          updated_at?: string
+          uploads_disabled?: boolean
+        }
+        Update: {
+          ai_disabled?: boolean
+          id?: boolean
+          maintenance_mode?: boolean
+          message?: string
+          ocr_disabled?: boolean
+          registrations_disabled?: boolean
+          updated_at?: string
+          uploads_disabled?: boolean
         }
         Relationships: []
       }
@@ -89,6 +403,102 @@ export type Database = {
           subject?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      feature_flags: {
+        Row: {
+          created_at: string
+          daily_limit: number | null
+          description: string | null
+          enabled: boolean
+          id: string
+          key: string
+          label: string
+          maintenance: boolean
+          min_plan: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          daily_limit?: number | null
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          key: string
+          label: string
+          maintenance?: boolean
+          min_plan?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          daily_limit?: number | null
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          key?: string
+          label?: string
+          maintenance?: boolean
+          min_plan?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      feature_usage: {
+        Row: {
+          count: number
+          created_at: string
+          feature_key: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          count?: number
+          created_at?: string
+          feature_key: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          count?: number
+          created_at?: string
+          feature_key?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      files: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          mime_type: string | null
+          name: string
+          size_kb: number
+          url: string | null
+          user_id: string | null
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          id?: string
+          mime_type?: string | null
+          name: string
+          size_kb?: number
+          url?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          mime_type?: string | null
+          name?: string
+          size_kb?: number
+          url?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -199,6 +609,87 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          kind: string
+          scheduled_at: string | null
+          sent_at: string | null
+          status: string
+          target_user_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          kind?: string
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string
+          target_user_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          kind?: string
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string
+          target_user_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ocr_requests: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          error: string | null
+          file_name: string | null
+          file_size_kb: number | null
+          id: string
+          mime_type: string | null
+          success: boolean
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          file_name?: string | null
+          file_size_kb?: number | null
+          id?: string
+          mime_type?: string | null
+          success?: boolean
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          file_name?: string | null
+          file_size_kb?: number | null
+          id?: string
+          mime_type?: string | null
+          success?: boolean
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       planner_tasks: {
         Row: {
           created_at: string
@@ -258,6 +749,60 @@ export type Database = {
           },
         ]
       }
+      plans: {
+        Row: {
+          active: boolean
+          ads_enabled: boolean
+          ai_daily_limit: number
+          code: string
+          created_at: string
+          features: Json
+          id: string
+          name: string
+          ocr_daily_limit: number
+          price_inr: number
+          quiz_daily_limit: number
+          sort_order: number
+          storage_mb_limit: number
+          updated_at: string
+          upload_mb_limit: number
+        }
+        Insert: {
+          active?: boolean
+          ads_enabled?: boolean
+          ai_daily_limit?: number
+          code: string
+          created_at?: string
+          features?: Json
+          id?: string
+          name: string
+          ocr_daily_limit?: number
+          price_inr?: number
+          quiz_daily_limit?: number
+          sort_order?: number
+          storage_mb_limit?: number
+          updated_at?: string
+          upload_mb_limit?: number
+        }
+        Update: {
+          active?: boolean
+          ads_enabled?: boolean
+          ai_daily_limit?: number
+          code?: string
+          created_at?: string
+          features?: Json
+          id?: string
+          name?: string
+          ocr_daily_limit?: number
+          price_inr?: number
+          quiz_daily_limit?: number
+          sort_order?: number
+          storage_mb_limit?: number
+          updated_at?: string
+          upload_mb_limit?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -265,10 +810,14 @@ export type Database = {
           class_level: string | null
           created_at: string
           display_name: string | null
+          email: string | null
           goals: string | null
           id: string
           language: string
+          last_active_at: string | null
           learning_style: string | null
+          plan: string
+          status: string
           subjects: string[]
           updated_at: string
         }
@@ -278,10 +827,14 @@ export type Database = {
           class_level?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           goals?: string | null
           id: string
           language?: string
+          last_active_at?: string | null
           learning_style?: string | null
+          plan?: string
+          status?: string
           subjects?: string[]
           updated_at?: string
         }
@@ -291,10 +844,14 @@ export type Database = {
           class_level?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           goals?: string | null
           id?: string
           language?: string
+          last_active_at?: string | null
           learning_style?: string | null
+          plan?: string
+          status?: string
           subjects?: string[]
           updated_at?: string
         }
@@ -469,6 +1026,90 @@ export type Database = {
         }
         Relationships: []
       }
+      security_events: {
+        Row: {
+          created_at: string
+          detail: string | null
+          email: string | null
+          event_type: string
+          id: string
+          ip: string | null
+          reviewed: boolean
+          severity: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          detail?: string | null
+          email?: string | null
+          event_type: string
+          id?: string
+          ip?: string | null
+          reviewed?: boolean
+          severity?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          detail?: string | null
+          email?: string | null
+          event_type?: string
+          id?: string
+          ip?: string | null
+          reviewed?: boolean
+          severity?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      study_material: {
+        Row: {
+          body: string
+          chapter: string | null
+          class_level: number | null
+          created_at: string
+          created_by: string | null
+          id: string
+          kind: string
+          language: string
+          published: boolean
+          subject: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          chapter?: string | null
+          class_level?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          language?: string
+          published?: boolean
+          subject?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          chapter?: string | null
+          class_level?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          language?: string
+          published?: boolean
+          subject?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       study_sessions: {
         Row: {
           created_at: string
@@ -499,6 +1140,109 @@ export type Database = {
           started_at?: string
           subject?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      subjects: {
+        Row: {
+          board: string
+          class_id: string
+          created_at: string
+          id: string
+          language: string
+          name: string
+          published: boolean
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          board?: string
+          class_id: string
+          created_at?: string
+          id?: string
+          language?: string
+          name: string
+          published?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          board?: string
+          class_id?: string
+          created_at?: string
+          id?: string
+          language?: string
+          name?: string
+          published?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subjects_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          plan_code: string
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan_code?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan_code?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_plan_code_fkey"
+            columns: ["plan_code"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      system_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
         }
         Relationships: []
       }
@@ -535,14 +1279,43 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
+      app_role: "super_admin"
       goal_kind: "weekly" | "monthly"
       memory_category: "profile" | "preference" | "goal" | "fact"
       memory_source: "manual" | "inferred"
@@ -564,12 +1337,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -593,11 +1366,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -618,11 +1391,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -643,11 +1416,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -660,11 +1433,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -676,6 +1449,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["super_admin"],
       goal_kind: ["weekly", "monthly"],
       memory_category: ["profile", "preference", "goal", "fact"],
       memory_source: ["manual", "inferred"],
