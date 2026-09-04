@@ -16,6 +16,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedRemindersRouteImport } from './routes/_authenticated/reminders'
@@ -61,6 +62,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
@@ -122,7 +128,7 @@ const AuthenticatedChatThreadIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/guest': typeof GuestRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -135,13 +141,13 @@ export interface FileRoutesByFullPath {
   '/reminders': typeof AuthenticatedRemindersRoute
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/api/chat': typeof ApiChatRoute
+  '/admin/': typeof AdminIndexRoute
   '/chat/$threadId': typeof AuthenticatedChatThreadIdRoute
   '/settings/memory': typeof AuthenticatedSettingsMemoryRoute
   '/chat/': typeof AuthenticatedChatIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteRoute
   '/auth': typeof AuthRoute
   '/guest': typeof GuestRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -153,6 +159,7 @@ export interface FileRoutesByTo {
   '/reminders': typeof AuthenticatedRemindersRoute
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/api/chat': typeof ApiChatRoute
+  '/admin': typeof AdminIndexRoute
   '/chat/$threadId': typeof AuthenticatedChatThreadIdRoute
   '/settings/memory': typeof AuthenticatedSettingsMemoryRoute
   '/chat': typeof AuthenticatedChatIndexRoute
@@ -161,7 +168,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/admin': typeof AdminRouteRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/guest': typeof GuestRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -174,6 +181,7 @@ export interface FileRoutesById {
   '/_authenticated/reminders': typeof AuthenticatedRemindersRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/api/chat': typeof ApiChatRoute
+  '/admin/': typeof AdminIndexRoute
   '/_authenticated/chat/$threadId': typeof AuthenticatedChatThreadIdRoute
   '/_authenticated/settings/memory': typeof AuthenticatedSettingsMemoryRoute
   '/_authenticated/chat/': typeof AuthenticatedChatIndexRoute
@@ -195,13 +203,13 @@ export interface FileRouteTypes {
     | '/reminders'
     | '/settings'
     | '/api/chat'
+    | '/admin/'
     | '/chat/$threadId'
     | '/settings/memory'
     | '/chat/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
     | '/auth'
     | '/guest'
     | '/reset-password'
@@ -213,6 +221,7 @@ export interface FileRouteTypes {
     | '/reminders'
     | '/settings'
     | '/api/chat'
+    | '/admin'
     | '/chat/$threadId'
     | '/settings/memory'
     | '/chat'
@@ -233,6 +242,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reminders'
     | '/_authenticated/settings'
     | '/api/chat'
+    | '/admin/'
     | '/_authenticated/chat/$threadId'
     | '/_authenticated/settings/memory'
     | '/_authenticated/chat/'
@@ -241,7 +251,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  AdminRouteRoute: typeof AdminRouteRoute
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   GuestRoute: typeof GuestRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -299,6 +309,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/api/chat': {
       id: '/api/chat'
@@ -429,10 +446,22 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface AdminRouteRouteChildren {
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  AdminRouteRoute: AdminRouteRoute,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   GuestRoute: GuestRoute,
   ResetPasswordRoute: ResetPasswordRoute,
