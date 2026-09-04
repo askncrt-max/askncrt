@@ -16,7 +16,13 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as AdminQuestionsRouteImport } from './routes/admin/questions'
+import { Route as AdminMaterialRouteImport } from './routes/admin/material'
+import { Route as AdminFeaturesRouteImport } from './routes/admin/features'
+import { Route as AdminCurriculumRouteImport } from './routes/admin/curriculum'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedRemindersRouteImport } from './routes/_authenticated/reminders'
 import { Route as AuthenticatedQuizRouteImport } from './routes/_authenticated/quiz'
@@ -62,10 +68,40 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminQuestionsRoute = AdminQuestionsRouteImport.update({
+  id: '/questions',
+  path: '/questions',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminMaterialRoute = AdminMaterialRouteImport.update({
+  id: '/material',
+  path: '/material',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminFeaturesRoute = AdminFeaturesRouteImport.update({
+  id: '/features',
+  path: '/features',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminCurriculumRoute = AdminCurriculumRouteImport.update({
+  id: '/curriculum',
+  path: '/curriculum',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
@@ -122,7 +158,7 @@ const AuthenticatedChatThreadIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/guest': typeof GuestRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -134,14 +170,19 @@ export interface FileRoutesByFullPath {
   '/quiz': typeof AuthenticatedQuizRoute
   '/reminders': typeof AuthenticatedRemindersRoute
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
+  '/admin/curriculum': typeof AdminCurriculumRoute
+  '/admin/features': typeof AdminFeaturesRoute
+  '/admin/material': typeof AdminMaterialRoute
+  '/admin/questions': typeof AdminQuestionsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/api/chat': typeof ApiChatRoute
+  '/admin/': typeof AdminIndexRoute
   '/chat/$threadId': typeof AuthenticatedChatThreadIdRoute
   '/settings/memory': typeof AuthenticatedSettingsMemoryRoute
   '/chat/': typeof AuthenticatedChatIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteRoute
   '/auth': typeof AuthRoute
   '/guest': typeof GuestRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -152,7 +193,13 @@ export interface FileRoutesByTo {
   '/quiz': typeof AuthenticatedQuizRoute
   '/reminders': typeof AuthenticatedRemindersRoute
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
+  '/admin/curriculum': typeof AdminCurriculumRoute
+  '/admin/features': typeof AdminFeaturesRoute
+  '/admin/material': typeof AdminMaterialRoute
+  '/admin/questions': typeof AdminQuestionsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/api/chat': typeof ApiChatRoute
+  '/admin': typeof AdminIndexRoute
   '/chat/$threadId': typeof AuthenticatedChatThreadIdRoute
   '/settings/memory': typeof AuthenticatedSettingsMemoryRoute
   '/chat': typeof AuthenticatedChatIndexRoute
@@ -161,7 +208,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/admin': typeof AdminRouteRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/guest': typeof GuestRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -173,7 +220,13 @@ export interface FileRoutesById {
   '/_authenticated/quiz': typeof AuthenticatedQuizRoute
   '/_authenticated/reminders': typeof AuthenticatedRemindersRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
+  '/admin/curriculum': typeof AdminCurriculumRoute
+  '/admin/features': typeof AdminFeaturesRoute
+  '/admin/material': typeof AdminMaterialRoute
+  '/admin/questions': typeof AdminQuestionsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/api/chat': typeof ApiChatRoute
+  '/admin/': typeof AdminIndexRoute
   '/_authenticated/chat/$threadId': typeof AuthenticatedChatThreadIdRoute
   '/_authenticated/settings/memory': typeof AuthenticatedSettingsMemoryRoute
   '/_authenticated/chat/': typeof AuthenticatedChatIndexRoute
@@ -194,14 +247,19 @@ export interface FileRouteTypes {
     | '/quiz'
     | '/reminders'
     | '/settings'
+    | '/admin/curriculum'
+    | '/admin/features'
+    | '/admin/material'
+    | '/admin/questions'
+    | '/admin/users'
     | '/api/chat'
+    | '/admin/'
     | '/chat/$threadId'
     | '/settings/memory'
     | '/chat/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
     | '/auth'
     | '/guest'
     | '/reset-password'
@@ -212,7 +270,13 @@ export interface FileRouteTypes {
     | '/quiz'
     | '/reminders'
     | '/settings'
+    | '/admin/curriculum'
+    | '/admin/features'
+    | '/admin/material'
+    | '/admin/questions'
+    | '/admin/users'
     | '/api/chat'
+    | '/admin'
     | '/chat/$threadId'
     | '/settings/memory'
     | '/chat'
@@ -232,7 +296,13 @@ export interface FileRouteTypes {
     | '/_authenticated/quiz'
     | '/_authenticated/reminders'
     | '/_authenticated/settings'
+    | '/admin/curriculum'
+    | '/admin/features'
+    | '/admin/material'
+    | '/admin/questions'
+    | '/admin/users'
     | '/api/chat'
+    | '/admin/'
     | '/_authenticated/chat/$threadId'
     | '/_authenticated/settings/memory'
     | '/_authenticated/chat/'
@@ -241,7 +311,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  AdminRouteRoute: typeof AdminRouteRoute
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   GuestRoute: typeof GuestRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -300,12 +370,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
       fullPath: '/api/chat'
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/questions': {
+      id: '/admin/questions'
+      path: '/questions'
+      fullPath: '/admin/questions'
+      preLoaderRoute: typeof AdminQuestionsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/material': {
+      id: '/admin/material'
+      path: '/material'
+      fullPath: '/admin/material'
+      preLoaderRoute: typeof AdminMaterialRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/features': {
+      id: '/admin/features'
+      path: '/features'
+      fullPath: '/admin/features'
+      preLoaderRoute: typeof AdminFeaturesRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/curriculum': {
+      id: '/admin/curriculum'
+      path: '/curriculum'
+      fullPath: '/admin/curriculum'
+      preLoaderRoute: typeof AdminCurriculumRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
@@ -429,10 +541,32 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface AdminRouteRouteChildren {
+  AdminCurriculumRoute: typeof AdminCurriculumRoute
+  AdminFeaturesRoute: typeof AdminFeaturesRoute
+  AdminMaterialRoute: typeof AdminMaterialRoute
+  AdminQuestionsRoute: typeof AdminQuestionsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminCurriculumRoute: AdminCurriculumRoute,
+  AdminFeaturesRoute: AdminFeaturesRoute,
+  AdminMaterialRoute: AdminMaterialRoute,
+  AdminQuestionsRoute: AdminQuestionsRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  AdminRouteRoute: AdminRouteRoute,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   GuestRoute: GuestRoute,
   ResetPasswordRoute: ResetPasswordRoute,

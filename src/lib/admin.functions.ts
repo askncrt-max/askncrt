@@ -289,7 +289,14 @@ export const adminOverview = createServerFn({ method: "POST" })
       .reduce((sum: number, s: any) => sum + Number(priceMap.get(s.plan_code) ?? 0), 0);
 
     return {
-      users: { total: totalUsers, new: newUsers, active: activeUsers, ...planCounts },
+      users: {
+        total: totalUsers,
+        new: newUsers,
+        active: activeUsers,
+        free: planCounts["free"] ?? 0,
+        plus: planCounts["plus"] ?? 0,
+        pro: planCounts["pro"] ?? 0,
+      },
       ai: {
         requests: aiRequests,
         failed: aiFailed,
