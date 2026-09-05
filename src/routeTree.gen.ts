@@ -20,9 +20,13 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as AdminQuestionsRouteImport } from './routes/admin/questions'
+import { Route as AdminPlansRouteImport } from './routes/admin/plans'
+import { Route as AdminOcrRouteImport } from './routes/admin/ocr'
 import { Route as AdminMaterialRouteImport } from './routes/admin/material'
+import { Route as AdminFilesRouteImport } from './routes/admin/files'
 import { Route as AdminFeaturesRouteImport } from './routes/admin/features'
 import { Route as AdminCurriculumRouteImport } from './routes/admin/curriculum'
+import { Route as AdminAiRouteImport } from './routes/admin/ai'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedRemindersRouteImport } from './routes/_authenticated/reminders'
 import { Route as AuthenticatedQuizRouteImport } from './routes/_authenticated/quiz'
@@ -88,9 +92,24 @@ const AdminQuestionsRoute = AdminQuestionsRouteImport.update({
   path: '/questions',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminPlansRoute = AdminPlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminOcrRoute = AdminOcrRouteImport.update({
+  id: '/ocr',
+  path: '/ocr',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminMaterialRoute = AdminMaterialRouteImport.update({
   id: '/material',
   path: '/material',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminFilesRoute = AdminFilesRouteImport.update({
+  id: '/files',
+  path: '/files',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminFeaturesRoute = AdminFeaturesRouteImport.update({
@@ -101,6 +120,11 @@ const AdminFeaturesRoute = AdminFeaturesRouteImport.update({
 const AdminCurriculumRoute = AdminCurriculumRouteImport.update({
   id: '/curriculum',
   path: '/curriculum',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminAiRoute = AdminAiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
@@ -170,9 +194,13 @@ export interface FileRoutesByFullPath {
   '/quiz': typeof AuthenticatedQuizRoute
   '/reminders': typeof AuthenticatedRemindersRoute
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
+  '/admin/ai': typeof AdminAiRoute
   '/admin/curriculum': typeof AdminCurriculumRoute
   '/admin/features': typeof AdminFeaturesRoute
+  '/admin/files': typeof AdminFilesRoute
   '/admin/material': typeof AdminMaterialRoute
+  '/admin/ocr': typeof AdminOcrRoute
+  '/admin/plans': typeof AdminPlansRoute
   '/admin/questions': typeof AdminQuestionsRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/chat': typeof ApiChatRoute
@@ -193,9 +221,13 @@ export interface FileRoutesByTo {
   '/quiz': typeof AuthenticatedQuizRoute
   '/reminders': typeof AuthenticatedRemindersRoute
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
+  '/admin/ai': typeof AdminAiRoute
   '/admin/curriculum': typeof AdminCurriculumRoute
   '/admin/features': typeof AdminFeaturesRoute
+  '/admin/files': typeof AdminFilesRoute
   '/admin/material': typeof AdminMaterialRoute
+  '/admin/ocr': typeof AdminOcrRoute
+  '/admin/plans': typeof AdminPlansRoute
   '/admin/questions': typeof AdminQuestionsRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/chat': typeof ApiChatRoute
@@ -220,9 +252,13 @@ export interface FileRoutesById {
   '/_authenticated/quiz': typeof AuthenticatedQuizRoute
   '/_authenticated/reminders': typeof AuthenticatedRemindersRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
+  '/admin/ai': typeof AdminAiRoute
   '/admin/curriculum': typeof AdminCurriculumRoute
   '/admin/features': typeof AdminFeaturesRoute
+  '/admin/files': typeof AdminFilesRoute
   '/admin/material': typeof AdminMaterialRoute
+  '/admin/ocr': typeof AdminOcrRoute
+  '/admin/plans': typeof AdminPlansRoute
   '/admin/questions': typeof AdminQuestionsRoute
   '/admin/users': typeof AdminUsersRoute
   '/api/chat': typeof ApiChatRoute
@@ -247,9 +283,13 @@ export interface FileRouteTypes {
     | '/quiz'
     | '/reminders'
     | '/settings'
+    | '/admin/ai'
     | '/admin/curriculum'
     | '/admin/features'
+    | '/admin/files'
     | '/admin/material'
+    | '/admin/ocr'
+    | '/admin/plans'
     | '/admin/questions'
     | '/admin/users'
     | '/api/chat'
@@ -270,9 +310,13 @@ export interface FileRouteTypes {
     | '/quiz'
     | '/reminders'
     | '/settings'
+    | '/admin/ai'
     | '/admin/curriculum'
     | '/admin/features'
+    | '/admin/files'
     | '/admin/material'
+    | '/admin/ocr'
+    | '/admin/plans'
     | '/admin/questions'
     | '/admin/users'
     | '/api/chat'
@@ -296,9 +340,13 @@ export interface FileRouteTypes {
     | '/_authenticated/quiz'
     | '/_authenticated/reminders'
     | '/_authenticated/settings'
+    | '/admin/ai'
     | '/admin/curriculum'
     | '/admin/features'
+    | '/admin/files'
     | '/admin/material'
+    | '/admin/ocr'
+    | '/admin/plans'
     | '/admin/questions'
     | '/admin/users'
     | '/api/chat'
@@ -398,11 +446,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminQuestionsRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/plans': {
+      id: '/admin/plans'
+      path: '/plans'
+      fullPath: '/admin/plans'
+      preLoaderRoute: typeof AdminPlansRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/ocr': {
+      id: '/admin/ocr'
+      path: '/ocr'
+      fullPath: '/admin/ocr'
+      preLoaderRoute: typeof AdminOcrRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/material': {
       id: '/admin/material'
       path: '/material'
       fullPath: '/admin/material'
       preLoaderRoute: typeof AdminMaterialRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/files': {
+      id: '/admin/files'
+      path: '/files'
+      fullPath: '/admin/files'
+      preLoaderRoute: typeof AdminFilesRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/features': {
@@ -417,6 +486,13 @@ declare module '@tanstack/react-router' {
       path: '/curriculum'
       fullPath: '/admin/curriculum'
       preLoaderRoute: typeof AdminCurriculumRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/ai': {
+      id: '/admin/ai'
+      path: '/ai'
+      fullPath: '/admin/ai'
+      preLoaderRoute: typeof AdminAiRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/_authenticated/settings': {
@@ -542,18 +618,26 @@ const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface AdminRouteRouteChildren {
+  AdminAiRoute: typeof AdminAiRoute
   AdminCurriculumRoute: typeof AdminCurriculumRoute
   AdminFeaturesRoute: typeof AdminFeaturesRoute
+  AdminFilesRoute: typeof AdminFilesRoute
   AdminMaterialRoute: typeof AdminMaterialRoute
+  AdminOcrRoute: typeof AdminOcrRoute
+  AdminPlansRoute: typeof AdminPlansRoute
   AdminQuestionsRoute: typeof AdminQuestionsRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminAiRoute: AdminAiRoute,
   AdminCurriculumRoute: AdminCurriculumRoute,
   AdminFeaturesRoute: AdminFeaturesRoute,
+  AdminFilesRoute: AdminFilesRoute,
   AdminMaterialRoute: AdminMaterialRoute,
+  AdminOcrRoute: AdminOcrRoute,
+  AdminPlansRoute: AdminPlansRoute,
   AdminQuestionsRoute: AdminQuestionsRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
