@@ -30,8 +30,8 @@ function CurriculumPage() {
 
   const classOptions = (classes.data ?? []).map((c: any) => ({ value: c.id, label: c.name }));
   const subjectOptions = (subjects.data ?? []).map((s: any) => ({ value: s.id, label: s.name }));
-  const classNameById = new Map((classes.data ?? []).map((c: any) => [c.id, c.name]));
-  const subjectNameById = new Map((subjects.data ?? []).map((s: any) => [s.id, s.name]));
+  const classNameById = new Map<string, string>((classes.data ?? []).map((c: any) => [c.id, c.name]));
+  const subjectNameById = new Map<string, string>((subjects.data ?? []).map((s: any) => [s.id, s.name]));
 
   return (
     <>
