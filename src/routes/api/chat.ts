@@ -265,6 +265,7 @@ export const Route = createFileRoute("/api/chat")({
             ? '\n\nTHIS TURN: the user is asking who created/owns AskNCERT. Answer exactly: "AskNCERT was created by Dhiraj Bhale." You may add one short friendly sentence, but never change the name.'
             : "";
 
+          const startedAt = Date.now();
           const result = streamText({
             model,
             system: BASE_SYSTEM + todayBlock + memoryBlock + volatileBlock + ownerBlock,
@@ -272,6 +273,48 @@ export const Route = createFileRoute("/api/chat")({
 
             tools: Object.keys(tools).length ? tools : undefined,
             stopWhen: stepCountIs(50),
+            onFinish: async ({ usage }) => {
+              try {
+                const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+                await supabaseAdmin.from("ai_usage").insert({
+                  user_id: userId ?? null,
+                  provider: "Lovable AI Gateway",
+                  model: MODEL_ID,
+                  kind: "chat",
+                  input_tokens: usage?.inputTokens ?? 0,
+                  output_tokens: usage?.outputTokens ?? 0,
+                  duration_ms: Date.now() - startedAt,
+                  success: true,
+                });
+                if (userId) {
+                  await supabaseAdmin
+                    .from("profiles")
+                    .update({ last_active_at: new Date().toISOString() })
+                    .eq("id", userId);
+                  await supabaseAdmin
+                    .from("feature_usage")
+                    .insert({ user_id: userId, feature_key: "ai_chat", count: 1 });
+                }
+              } catch (err) {
+                console.error("usage logging failed", err);
+              }
+            },
+            onError: async ({ error }) => {
+              try {
+                const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+                await supabaseAdmin.from("ai_usage").insert({
+                  user_id: userId ?? null,
+                  provider: "Lovable AI Gateway",
+                  model: MODEL_ID,
+                  kind: "chat",
+                  duration_ms: Date.now() - startedAt,
+                  success: false,
+                  error: error instanceof Error ? error.message : String(error),
+                });
+              } catch {
+                /* ignore */
+              }
+            },
           });
 
           return result.toUIMessageStreamResponse({ originalMessages: body.messages });
