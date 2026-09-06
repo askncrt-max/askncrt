@@ -74,6 +74,33 @@ export const Route = createFileRoute("/api/chat")({
 
           const firecrawlKey = process.env.FIRECRAWL_API_KEY;
 
+          // Platform controls: emergency mode and feature switches are enforced here,
+          // on the server, so the admin panel really governs the AI.
+          const controlSb = createClient<Database>(
+            process.env.SUPABASE_URL!,
+            process.env.SUPABASE_PUBLISHABLE_KEY!,
+            { auth: { persistSession: false, autoRefreshToken: false } },
+          );
+          const [{ data: emergency }, { data: chatFlag }] = await Promise.all([
+            controlSb.from("emergency_settings").select("*").maybeSingle(),
+            controlSb.from("feature_flags").select("*").eq("key", "ai_chat").maybeSingle(),
+          ]);
+          if (emergency?.maintenance_mode) {
+            return new Response(
+              emergency.message || "AskNCERT is under maintenance. Please try again shortly.",
+              { status: 503 },
+            );
+          }
+          if (emergency?.ai_disabled) {
+            return new Response("AI is temporarily disabled by the administrator.", { status: 503 });
+          }
+          if (chatFlag && !chatFlag.enabled) {
+            return new Response("AI Chat is currently turned off.", { status: 503 });
+          }
+          if (chatFlag?.maintenance) {
+            return new Response("AI Chat is under maintenance. Please try again shortly.", { status: 503 });
+          }
+
           // Load memory for the signed-in user (best-effort; no auth = anonymous mode)
           let memoryBlock = "";
           let userId: string | undefined;
