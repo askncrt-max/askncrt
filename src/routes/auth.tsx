@@ -64,9 +64,22 @@ function AuthPage() {
     }
   }
 
+
+  async function routeAfterAuth() {
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) return navigate({ to: "/auth", replace: true });
+    const { data: role } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", data.user.id)
+      .eq("role", "super_admin")
+      .maybeSingle();
+    navigate({ to: role ? "/admin" : "/chat", replace: true });
+  }
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/chat", replace: true });
+      if (data.session) void routeAfterAuth();
     });
   }, [navigate]);
 
@@ -81,7 +94,7 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/chat", replace: true });
+    await routeAfterAuth();
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -100,13 +113,13 @@ function AuthPage() {
         if (error) throw error;
         applyRememberPreference(remember);
         toast.success("Welcome to AskNCERT! Check your email if verification is required.");
-        navigate({ to: "/chat", replace: true });
+        await routeAfterAuth();
       } else if (mode === "signin") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         applyRememberPreference(remember);
         toast.success("Welcome back!");
-        navigate({ to: "/chat", replace: true });
+        await routeAfterAuth();
       } else {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: window.location.origin + "/reset-password",
