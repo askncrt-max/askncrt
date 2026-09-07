@@ -27,7 +27,7 @@ function AdminDashboard() {
   const overview = useServerFn(adminOverview);
   const { data, isLoading, error } = useQuery({
     queryKey: ["admin", "overview", range],
-    queryFn: () => overview({ data: { range } }),
+    queryFn: () => { console.log("DBG overview fetch"); return overview({ data: { range } }); },
   });
 
   return (
