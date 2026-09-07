@@ -102,6 +102,13 @@ function AuthPage() {
     setLoading(true);
     try {
       if (mode === "signup") {
+        const { data: em } = await supabase
+          .from("emergency_settings")
+          .select("registrations_disabled,message")
+          .maybeSingle();
+        if (em?.registrations_disabled) {
+          throw new Error(em.message || "New sign-ups are temporarily paused. Please try again later.");
+        }
         const { error } = await supabase.auth.signUp({
           email,
           password,
