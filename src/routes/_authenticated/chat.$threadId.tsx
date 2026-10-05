@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter, type ErrorComponentProps } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2 } from "lucide-react";
@@ -9,7 +9,7 @@ import { getConversation } from "@/lib/conversations.functions";
 export const Route = createFileRoute("/_authenticated/chat/$threadId")({
   component: ChatThread,
   errorComponent: ChatThreadError,
-  notFoundComponent: ChatThreadMissing,
+  notFoundComponent: () => <MissingView />,
 });
 
 function ChatThread() {
@@ -32,7 +32,7 @@ function ChatThread() {
   }
 
   if (error) throw error;
-  if (!data) return <ChatThreadMissing />;
+  if (!data) return <MissingView />;
 
   return (
     <ChatWindow
@@ -44,12 +44,12 @@ function ChatThread() {
   );
 }
 
-function ChatThreadError({ error, reset }: { error: Error; reset: () => void }) {
+function ChatThreadError({ error, reset }: ErrorComponentProps) {
   const router = useRouter();
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
       <p className="text-sm font-medium">This chat couldn't be loaded.</p>
-      <p className="max-w-sm text-xs text-muted-foreground">{error.message}</p>
+      <p className="max-w-sm text-xs text-muted-foreground">{error instanceof Error ? error.message : String(error)}</p>
       <button
         onClick={() => {
           router.invalidate();
@@ -63,7 +63,7 @@ function ChatThreadError({ error, reset }: { error: Error; reset: () => void }) 
   );
 }
 
-function ChatThreadMissing() {
+function MissingView() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
       <p className="text-sm font-medium">This chat no longer exists.</p>
