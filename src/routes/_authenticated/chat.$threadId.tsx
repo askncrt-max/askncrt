@@ -49,7 +49,7 @@ function ChatThreadError({ error, reset }: ErrorComponentProps) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
       <p className="text-sm font-medium">This chat couldn't be loaded.</p>
-      <p className="max-w-sm text-xs text-muted-foreground">{error.message}</p>
+      <p className="max-w-sm text-xs text-muted-foreground">{error instanceof Error ? error.message : String(error)}</p>
       <button
         onClick={() => {
           router.invalidate();
