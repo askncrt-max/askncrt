@@ -816,6 +816,9 @@ export type Database = {
           language: string
           last_active_at: string | null
           learning_style: string | null
+          legal_accepted_at: string | null
+          legal_privacy_version: string | null
+          legal_terms_version: string | null
           plan: string
           status: string
           subjects: string[]
@@ -833,6 +836,9 @@ export type Database = {
           language?: string
           last_active_at?: string | null
           learning_style?: string | null
+          legal_accepted_at?: string | null
+          legal_privacy_version?: string | null
+          legal_terms_version?: string | null
           plan?: string
           status?: string
           subjects?: string[]
@@ -850,6 +856,9 @@ export type Database = {
           language?: string
           last_active_at?: string | null
           learning_style?: string | null
+          legal_accepted_at?: string | null
+          legal_privacy_version?: string | null
+          legal_terms_version?: string | null
           plan?: string
           status?: string
           subjects?: string[]

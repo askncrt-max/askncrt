@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep legal documents as public TanStack routes and run self-account deletion and consent recording through authenticated server functions; this reuses the existing auth boundary and avoids changing the admin system.
