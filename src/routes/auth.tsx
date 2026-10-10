@@ -4,6 +4,7 @@ import { Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { LEGAL_ACCEPTANCE_PENDING_KEY, PRIVACY_VERSION, TERMS_VERSION } from "@/lib/legal-versions";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -33,6 +34,7 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [legalAccepted, setLegalAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [remember, setRemember] = useState(() => {
     if (typeof window === "undefined") return true;
@@ -84,11 +86,19 @@ function AuthPage() {
   }, [navigate]);
 
   async function handleGoogle() {
+    if (mode === "signup" && !legalAccepted) {
+      toast.error("Please agree to the Terms & Conditions and acknowledge the Privacy Policy first.");
+      return;
+    }
+    if (mode === "signup") {
+      localStorage.setItem(LEGAL_ACCEPTANCE_PENDING_KEY, "1");
+    }
     setLoading(true);
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
     if (result.error) {
+      if (mode === "signup") localStorage.removeItem(LEGAL_ACCEPTANCE_PENDING_KEY);
       toast.error(result.error.message || "Google sign-in failed");
       setLoading(false);
       return;
@@ -102,6 +112,7 @@ function AuthPage() {
     setLoading(true);
     try {
       if (mode === "signup") {
+        if (!legalAccepted) throw new Error("Please agree to the Terms & Conditions and acknowledge the Privacy Policy.");
         const { data: em } = await supabase
           .from("emergency_settings")
           .select("registrations_disabled,message")
@@ -114,7 +125,11 @@ function AuthPage() {
           password,
           options: {
             emailRedirectTo: window.location.origin,
-            data: { full_name: name },
+            data: {
+              full_name: name,
+              legal_terms_version: TERMS_VERSION,
+              legal_privacy_version: PRIVACY_VERSION,
+            },
           },
         });
         if (error) throw error;
@@ -226,6 +241,21 @@ function AuthPage() {
                   className="size-4 rounded border-input accent-primary"
                 />
                 Remember me on this device
+              </label>
+            )}
+
+            {mode === "signup" && (
+              <label className="flex cursor-pointer items-start gap-2 pt-1 text-xs leading-5 text-muted-foreground select-none">
+                <input
+                  type="checkbox"
+                  checked={legalAccepted}
+                  onChange={(e) => setLegalAccepted(e.target.checked)}
+                  required
+                  className="mt-0.5 size-4 shrink-0 rounded border-input accent-primary"
+                />
+                <span>
+                  I agree to the <Link to="/terms" className="font-medium text-primary underline underline-offset-4" onClick={(event) => event.stopPropagation()}>Terms &amp; Conditions</Link> and acknowledge the <Link to="/privacy-policy" className="font-medium text-primary underline underline-offset-4" onClick={(event) => event.stopPropagation()}>Privacy Policy</Link>.
+                </span>
               </label>
             )}
 
