@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { PRIVACY_VERSION, TERMS_VERSION } from "@/lib/legal-versions";
 
 export const getProfile = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -33,9 +34,6 @@ export const updateProfile = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return row;
   });
-
-const TERMS_VERSION = "2026-10-08";
-const PRIVACY_VERSION = "2026-10-08";
 
 export const acceptLegalPolicies = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
