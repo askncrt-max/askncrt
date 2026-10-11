@@ -91,7 +91,6 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
       "exams",
       "messages",
       "notes",
-      "notifications",
       "ocr_requests",
       "planner_tasks",
       "quiz_attempts",
@@ -109,6 +108,36 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
       if (error) throw new Error("We couldn't finish removing your saved data. Please retry.");
     }
 
+    const { error: notificationError } = await admin
+      .from("notifications")
+      .delete()
+      .eq("target_user_id", userId);
+    if (notificationError) throw new Error("We couldn't finish removing your saved data. Please retry.");
+
+    // Retain only de-identified operational aggregates; delete uploaded-file metadata and security details.
+    const { error: featureUsageError } = await admin
+      .from("feature_usage")
+      .update({ user_id: null })
+      .eq("user_id", userId);
+    if (featureUsageError) throw new Error("We couldn't finish removing account references. Please retry.");
+    const { error: aiUsageError } = await admin
+      .from("ai_usage")
+      .update({ user_id: null, error: null })
+      .eq("user_id", userId);
+    if (aiUsageError) throw new Error("We couldn't finish removing account references. Please retry.");
+    const { error: ocrUsageError } = await admin
+      .from("ocr_requests")
+      .update({ user_id: null, file_name: null, error: null })
+      .eq("user_id", userId);
+    if (ocrUsageError) throw new Error("We couldn't finish removing account references. Please retry.");
+    const { error: securityError } = await admin
+      .from("security_events")
+      .delete()
+      .eq("user_id", userId);
+    if (securityError) throw new Error("We couldn't finish removing account references. Please retry.");
+    const { error: fileError } = await admin.from("files").delete().eq("user_id", userId);
+    if (fileError) throw new Error("We couldn't finish removing account references. Please retry.");
+
     // Retain administrative audit entries without keeping identifying references or before/after values.
     const { error: auditError } = await admin
       .from("audit_logs")
@@ -121,12 +150,6 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
       .update({ admin_id: null, admin_email: null })
       .eq("admin_id", userId);
     if (adminIdError) throw new Error("We couldn't finish removing account references. Please retry.");
-
-    const nullableOwnedTables = ["ai_usage", "feature_usage", "files", "ocr_requests", "security_events"];
-    for (const table of nullableOwnedTables) {
-      const { error } = await admin.from(table).update({ user_id: null }).eq("user_id", userId);
-      if (error) throw new Error("We couldn't finish removing account references. Please retry.");
-    }
 
     const { error: materialError } = await admin
       .from("study_material")
