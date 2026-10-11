@@ -1,7 +1,5 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { acceptLegalPolicies } from "@/lib/profile.functions";
-import { LEGAL_ACCEPTANCE_PENDING_KEY, PRIVACY_VERSION, TERMS_VERSION } from "@/lib/legal-versions";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -24,10 +22,7 @@ export const Route = createFileRoute("/_authenticated")({
       .eq("id", data.user.id)
       .maybeSingle();
 
-    if (typeof window !== "undefined" && localStorage.getItem(LEGAL_ACCEPTANCE_PENDING_KEY) === "1") {
-      await acceptLegalPolicies({ data: { termsVersion: TERMS_VERSION, privacyVersion: PRIVACY_VERSION } });
-      localStorage.removeItem(LEGAL_ACCEPTANCE_PENDING_KEY);
-    } else if (
+    if (
       location.pathname !== "/settings/legal-consent" &&
       (profile?.legal_terms_version || profile?.legal_privacy_version) &&
       (profile.legal_terms_version !== TERMS_VERSION || profile.legal_privacy_version !== PRIVACY_VERSION)

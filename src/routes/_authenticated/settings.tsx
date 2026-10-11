@@ -1,12 +1,26 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { Loader2, Moon, Sun, LogOut } from "lucide-react";
+import { Loader2, Moon, Sun, LogOut, Trash2, FileText, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { getProfile, updateProfile } from "@/lib/profile.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { deleteMyAccount } from "@/lib/profile.functions";
+import { LEGAL_ACCEPTANCE_PENDING_KEY } from "@/lib/legal-versions";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
@@ -34,6 +48,9 @@ function SettingsPage() {
   const qc = useQueryClient();
   const get = useServerFn(getProfile);
   const update = useServerFn(updateProfile);
+  const deleteAccount = useServerFn(deleteMyAccount);
+  const [deleteConfirmed, setDeleteConfirmed] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const { data: profile, isLoading } = useQuery({ queryKey: ["profile"], queryFn: () => get() });
 
@@ -79,6 +96,23 @@ function SettingsPage() {
     qc.clear();
     await supabase.auth.signOut();
     router.navigate({ to: "/auth", replace: true });
+  }
+
+  async function permanentlyDeleteAccount() {
+    if (!deleteConfirmed || deleting) return;
+    setDeleting(true);
+    try {
+      await qc.cancelQueries();
+      const result = await deleteAccount();
+      if (!result.ok) throw new Error("Account deletion could not be completed.");
+      qc.clear();
+      localStorage.removeItem(LEGAL_ACCEPTANCE_PENDING_KEY);
+      await supabase.auth.signOut({ scope: "local" });
+      router.navigate({ to: "/auth", replace: true });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Account deletion failed. Please try again.");
+      setDeleting(false);
+    }
   }
 
   return (
@@ -172,7 +206,69 @@ function SettingsPage() {
               </button>
             </Card>
 
-            <Card title="Account">
+            <Card title="Privacy & Legal">
+              <Link
+                to="/privacy-policy"
+                className="flex min-h-11 items-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium hover:bg-muted"
+              >
+                <ShieldCheck className="size-4 text-primary" /> Privacy Policy
+              </Link>
+              <Link
+                to="/terms"
+                className="flex min-h-11 items-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium hover:bg-muted"
+              >
+                <FileText className="size-4 text-primary" /> Terms &amp; Conditions
+              </Link>
+              <Link
+                to="/delete-account"
+                className="inline-flex text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+              >
+                Account deletion information
+              </Link>
+            </Card>
+
+            <Card title="Account & Security">
+              <AlertDialog onOpenChange={(open) => { if (!open) setDeleteConfirmed(false); }}>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" className="w-full justify-start">
+                    <Trash2 className="size-4" /> Delete Account
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="max-h-[90dvh] overflow-y-auto">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Permanently delete your account?</AlertDialogTitle>
+                    <AlertDialogDescription className="space-y-3 text-left">
+                      <span className="block">This cannot be undone. Your profile, chats, messages, notes, saved AI memory, quizzes, planner items, reminders, study records, and account-linked files and usage records will be removed.</span>
+                      <span className="block">A small number of de-identified administrative audit and usage totals may remain for security or legal recordkeeping. Backups may take time to expire.</span>
+                      <span className="block">You will be signed out after deletion. Your account and saved study information cannot be restored.</span>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <label className="flex cursor-pointer items-start gap-3 text-sm leading-6">
+                    <input
+                      type="checkbox"
+                      checked={deleteConfirmed}
+                      onChange={(event) => setDeleteConfirmed(event.target.checked)}
+                      disabled={deleting}
+                      className="mt-1 size-4 shrink-0 accent-primary"
+                    />
+                    <span>I understand this permanently deletes my account and saved data.</span>
+                  </label>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      disabled={!deleteConfirmed || deleting}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        void permanentlyDeleteAccount();
+                      }}
+                    >
+                      {deleting && <Loader2 className="size-4 animate-spin" />}
+                      Delete permanently
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
               <button
                 onClick={signOut}
                 className="flex w-full items-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/5"
