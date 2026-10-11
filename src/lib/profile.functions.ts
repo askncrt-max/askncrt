@@ -65,6 +65,10 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const userId = context.userId;
+    const { data: user, error: userError } = await context.supabase.auth.getUser();
+    if (userError || !user.user || user.user.id !== userId) {
+      throw new Error("Your sign-in could not be verified. Please sign in again and retry.");
+    }
     const { data: role, error: roleError } = await context.supabase
       .from("user_roles")
       .select("role")
@@ -84,8 +88,10 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
       "feature_usage",
       "files",
       "goals",
+      "exams",
       "messages",
       "notes",
+      "notifications",
       "ocr_requests",
       "planner_tasks",
       "quiz_attempts",
@@ -103,23 +109,38 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
       if (error) throw new Error("We couldn't finish removing your saved data. Please retry.");
     }
 
-    const { error: targetedNotificationsError } = await admin
-      .from("notifications")
-      .delete()
-      .eq("target_user_id", userId);
-    if (targetedNotificationsError) {
-      throw new Error("We couldn't finish removing your saved data. Please retry.");
-    }
-
-    // Keep the platform's administrative audit event, but remove data that identifies this target.
+    // Retain administrative audit entries without keeping identifying references or before/after values.
     const { error: auditError } = await admin
       .from("audit_logs")
       .update({ target_id: null, previous_value: null, new_value: null })
       .eq("target_id", userId);
     if (auditError) throw new Error("We couldn't finish removing account references. Please retry.");
 
+    const { error: adminIdError } = await admin
+      .from("audit_logs")
+      .update({ admin_id: null, admin_email: null })
+      .eq("admin_id", userId);
+    if (adminIdError) throw new Error("We couldn't finish removing account references. Please retry.");
+
+    const nullableOwnedTables = ["ai_usage", "feature_usage", "files", "ocr_requests", "security_events"];
+    for (const table of nullableOwnedTables) {
+      const { error } = await admin.from(table).update({ user_id: null }).eq("user_id", userId);
+      if (error) throw new Error("We couldn't finish removing account references. Please retry.");
+    }
+
+    const { error: materialError } = await admin
+      .from("study_material")
+      .update({ created_by: null })
+      .eq("created_by", userId);
+    if (materialError) throw new Error("We couldn't finish removing account references. Please retry.");
+    const { error: creatorNotificationError } = await admin
+      .from("notifications")
+      .update({ created_by: null })
+      .eq("created_by", userId);
+    if (creatorNotificationError) throw new Error("We couldn't finish removing account references. Please retry.");
+
     const { error: authError } = await admin.auth.admin.deleteUser(userId);
-    if (authError) throw new Error("Your saved data was removed, but account closure did not finish. Please retry.");
+    if (authError) throw new Error("Your account record could not be closed. Please retry.");
 
     return { ok: true };
   });
