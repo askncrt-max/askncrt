@@ -76,7 +76,40 @@ function AuthPage() {
       .eq("user_id", data.user.id)
       .eq("role", "super_admin")
       .maybeSingle();
-    navigate({ to: role ? "/admin" : "/chat", replace: true });
+    if (role) {
+      localStorage.removeItem(LEGAL_ACCEPTANCE_PENDING_KEY);
+      navigate({ to: "/admin", replace: true });
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("legal_terms_version,legal_privacy_version")
+      .eq("id", data.user.id)
+      .maybeSingle();
+    if (localStorage.getItem(LEGAL_ACCEPTANCE_PENDING_KEY) === "1") {
+      try {
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            legal_terms_version: TERMS_VERSION,
+            legal_privacy_version: PRIVACY_VERSION,
+            legal_accepted_at: new Date().toISOString(),
+          })
+          .eq("id", data.user.id);
+        if (!error) localStorage.removeItem(LEGAL_ACCEPTANCE_PENDING_KEY);
+      } catch {
+        /* Existing OAuth sign-in still proceeds if the acceptance sync is temporarily unavailable. */
+      }
+    }
+    if (
+      (profile?.legal_terms_version || profile?.legal_privacy_version) &&
+      (profile.legal_terms_version !== TERMS_VERSION || profile.legal_privacy_version !== PRIVACY_VERSION)
+    ) {
+      navigate({ to: "/settings/legal-consent", replace: true });
+      return;
+    }
+    navigate({ to: "/chat", replace: true });
   }
 
   useEffect(() => {
@@ -90,15 +123,11 @@ function AuthPage() {
       toast.error("Please agree to the Terms & Conditions and acknowledge the Privacy Policy first.");
       return;
     }
-    if (mode === "signup") {
-      localStorage.setItem(LEGAL_ACCEPTANCE_PENDING_KEY, "1");
-    }
     setLoading(true);
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
     if (result.error) {
-      if (mode === "signup") localStorage.removeItem(LEGAL_ACCEPTANCE_PENDING_KEY);
       toast.error(result.error.message || "Google sign-in failed");
       setLoading(false);
       return;
