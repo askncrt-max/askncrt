@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { PRIVACY_VERSION, TERMS_VERSION } from "@/lib/legal-versions";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -23,11 +24,11 @@ export const Route = createFileRoute("/_authenticated")({
       .maybeSingle();
 
     if (
-      location.pathname !== "/settings/legal-consent" &&
+      location.pathname !== "/legal-consent" &&
       (profile?.legal_terms_version || profile?.legal_privacy_version) &&
       (profile.legal_terms_version !== TERMS_VERSION || profile.legal_privacy_version !== PRIVACY_VERSION)
     ) {
-      throw redirect({ to: "/settings/legal-consent" });
+      throw redirect({ to: "/legal-consent" });
     }
 
     return { user: data.user };

@@ -82,7 +82,7 @@ function AuthPage() {
       return;
     }
 
-    const { data: profile } = await supabase
+    let { data: profile } = await supabase
       .from("profiles")
       .select("legal_terms_version,legal_privacy_version")
       .eq("id", data.user.id)
@@ -97,9 +97,15 @@ function AuthPage() {
             legal_accepted_at: new Date().toISOString(),
           })
           .eq("id", data.user.id);
-        if (!error) localStorage.removeItem(LEGAL_ACCEPTANCE_PENDING_KEY);
+        if (error) {
+          navigate({ to: "/legal-consent", replace: true });
+          return;
+        }
+        localStorage.removeItem(LEGAL_ACCEPTANCE_PENDING_KEY);
+        profile = { legal_terms_version: TERMS_VERSION, legal_privacy_version: PRIVACY_VERSION };
       } catch {
-        /* Existing OAuth sign-in still proceeds if the acceptance sync is temporarily unavailable. */
+        navigate({ to: "/legal-consent", replace: true });
+        return;
       }
     }
     if (
@@ -123,11 +129,15 @@ function AuthPage() {
       toast.error("Please agree to the Terms & Conditions and acknowledge the Privacy Policy first.");
       return;
     }
+    if (mode === "signup") {
+      localStorage.setItem(LEGAL_ACCEPTANCE_PENDING_KEY, "1");
+    }
     setLoading(true);
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
     if (result.error) {
+      if (mode === "signup") localStorage.removeItem(LEGAL_ACCEPTANCE_PENDING_KEY);
       toast.error(result.error.message || "Google sign-in failed");
       setLoading(false);
       return;
