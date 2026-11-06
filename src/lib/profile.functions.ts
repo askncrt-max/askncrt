@@ -83,24 +83,9 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const admin = supabaseAdmin as any;
     const ownedTables = [
-      "achievements",
-      "ai_usage",
-      "feature_usage",
-      "files",
-      "goals",
-      "exams",
-      "messages",
-      "notes",
-      "ocr_requests",
-      "planner_tasks",
-      "quiz_attempts",
-      "quiz_questions",
-      "quizzes",
-      "reminders",
-      "security_events",
-      "study_sessions",
-      "subscriptions",
-      "user_memory",
+      "achievements", "files", "goals", "exams", "messages", "conversations", "notes",
+      "planner_tasks", "quiz_attempts", "quiz_questions", "quizzes", "reminders",
+      "study_sessions", "subscriptions", "user_memory",
     ];
 
     for (const table of ownedTables) {
@@ -108,13 +93,30 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
       if (error) throw new Error("We couldn't finish removing your saved data. Please retry.");
     }
 
+    const { error: draftMaterialError } = await admin
+      .from("study_material")
+      .delete()
+      .eq("created_by", userId)
+      .eq("published", false);
+    if (draftMaterialError) throw new Error("We couldn't finish removing your saved data. Please retry.");
+    const { error: publishedMaterialError } = await admin
+      .from("study_material")
+      .update({ created_by: null })
+      .eq("created_by", userId)
+      .eq("published", true);
+    if (publishedMaterialError) throw new Error("We couldn't finish removing account references. Please retry.");
+    const { error: notificationCreatorError } = await admin
+      .from("notifications")
+      .update({ created_by: null })
+      .eq("created_by", userId);
+    if (notificationCreatorError) throw new Error("We couldn't finish removing account references. Please retry.");
     const { error: notificationError } = await admin
       .from("notifications")
       .delete()
       .eq("target_user_id", userId);
     if (notificationError) throw new Error("We couldn't finish removing your saved data. Please retry.");
 
-    // Retain only de-identified operational aggregates; delete uploaded-file metadata and security details.
+    // Retain only de-identified operational totals; remove security details and uploaded-file records.
     const { error: featureUsageError } = await admin
       .from("feature_usage")
       .update({ user_id: null })
@@ -130,13 +132,8 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
       .update({ user_id: null, file_name: null, error: null })
       .eq("user_id", userId);
     if (ocrUsageError) throw new Error("We couldn't finish removing account references. Please retry.");
-    const { error: securityError } = await admin
-      .from("security_events")
-      .delete()
-      .eq("user_id", userId);
+    const { error: securityError } = await admin.from("security_events").delete().eq("user_id", userId);
     if (securityError) throw new Error("We couldn't finish removing account references. Please retry.");
-    const { error: fileError } = await admin.from("files").delete().eq("user_id", userId);
-    if (fileError) throw new Error("We couldn't finish removing account references. Please retry.");
 
     // Retain administrative audit entries without keeping identifying references or before/after values.
     const { error: auditError } = await admin
