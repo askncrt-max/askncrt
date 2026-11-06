@@ -105,11 +105,6 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
       .eq("created_by", userId)
       .eq("published", true);
     if (publishedMaterialError) throw new Error("We couldn't finish removing account references. Please retry.");
-    const { error: notificationCreatorError } = await admin
-      .from("notifications")
-      .update({ created_by: null })
-      .eq("created_by", userId);
-    if (notificationCreatorError) throw new Error("We couldn't finish removing account references. Please retry.");
     const { error: notificationError } = await admin
       .from("notifications")
       .delete()

@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { PRIVACY_VERSION, TERMS_VERSION } from "@/lib/legal-versions";
+import { acceptLegalPolicies } from "@/lib/profile.functions";
+import { LEGAL_ACCEPTANCE_PENDING_KEY, PRIVACY_VERSION, TERMS_VERSION } from "@/lib/legal-versions";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -16,6 +17,15 @@ export const Route = createFileRoute("/_authenticated")({
       .eq("role", "super_admin")
       .maybeSingle();
     if (role) throw redirect({ to: "/admin" });
+
+    if (localStorage.getItem(LEGAL_ACCEPTANCE_PENDING_KEY) === "1") {
+      try {
+        await acceptLegalPolicies({ data: { termsVersion: TERMS_VERSION, privacyVersion: PRIVACY_VERSION } });
+        localStorage.removeItem(LEGAL_ACCEPTANCE_PENDING_KEY);
+      } catch {
+        throw redirect({ to: "/legal-consent" });
+      }
+    }
 
     const { data: profile } = await supabase
       .from("profiles")
