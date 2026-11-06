@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { LEGAL_ACCEPTANCE_PENDING_KEY, PRIVACY_VERSION, TERMS_VERSION } from "@/lib/legal-versions";
+import { acceptLegalPolicies } from "@/lib/profile.functions";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -89,18 +90,7 @@ function AuthPage() {
       .maybeSingle();
     if (localStorage.getItem(LEGAL_ACCEPTANCE_PENDING_KEY) === "1") {
       try {
-        const { error } = await supabase
-          .from("profiles")
-          .update({
-            legal_terms_version: TERMS_VERSION,
-            legal_privacy_version: PRIVACY_VERSION,
-            legal_accepted_at: new Date().toISOString(),
-          })
-          .eq("id", data.user.id);
-        if (error) {
-          navigate({ to: "/legal-consent", replace: true });
-          return;
-        }
+        await acceptLegalPolicies({ data: { termsVersion: TERMS_VERSION, privacyVersion: PRIVACY_VERSION } });
         localStorage.removeItem(LEGAL_ACCEPTANCE_PENDING_KEY);
         profile = { legal_terms_version: TERMS_VERSION, legal_privacy_version: PRIVACY_VERSION };
       } catch {
@@ -112,7 +102,7 @@ function AuthPage() {
       (profile?.legal_terms_version || profile?.legal_privacy_version) &&
       (profile.legal_terms_version !== TERMS_VERSION || profile.legal_privacy_version !== PRIVACY_VERSION)
     ) {
-      navigate({ to: "/settings/legal-consent", replace: true });
+      navigate({ to: "/legal-consent", replace: true });
       return;
     }
     navigate({ to: "/chat", replace: true });
