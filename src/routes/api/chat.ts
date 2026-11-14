@@ -76,15 +76,24 @@ export const Route = createFileRoute("/api/chat")({
 
           // Platform controls: emergency mode and feature switches are enforced here,
           // on the server, so the admin panel really governs the AI.
-          const controlSb = createClient<Database>(
-            process.env.SUPABASE_URL!,
-            process.env.SUPABASE_PUBLISHABLE_KEY!,
-            { auth: { persistSession: false, autoRefreshToken: false } },
-          );
-          const [{ data: emergency }, { data: chatFlag }] = await Promise.all([
-            controlSb.from("emergency_settings").select("*").maybeSingle(),
-            controlSb.from("feature_flags").select("*").eq("key", "ai_chat").maybeSingle(),
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const [
+            { data: emergency, error: emergencyError },
+            { data: chatFlag, error: chatFlagError },
+          ] = await Promise.all([
+            supabaseAdmin
+              .from("emergency_settings")
+              .select("maintenance_mode,ai_disabled,message")
+              .maybeSingle(),
+            supabaseAdmin
+              .from("feature_flags")
+              .select("enabled,maintenance")
+              .eq("key", "ai_chat")
+              .maybeSingle(),
           ]);
+          if (emergencyError || chatFlagError) {
+            return new Response("AI is temporarily unavailable. Please try again shortly.", { status: 503 });
+          }
           if (emergency?.maintenance_mode) {
             return new Response(
               emergency.message || "AskNCERT is under maintenance. Please try again shortly.",
