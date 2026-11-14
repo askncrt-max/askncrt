@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { LEGAL_ACCEPTANCE_PENDING_KEY, PRIVACY_VERSION, TERMS_VERSION } from "@/lib/legal-versions";
 import { acceptLegalPolicies } from "@/lib/profile.functions";
+import { getSignupAvailability } from "@/lib/public-controls.functions";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -142,12 +143,9 @@ function AuthPage() {
     try {
       if (mode === "signup") {
         if (!legalAccepted) throw new Error("Please agree to the Terms & Conditions and acknowledge the Privacy Policy.");
-        const { data: em } = await supabase
-          .from("emergency_settings")
-          .select("registrations_disabled,message")
-          .maybeSingle();
-        if (em?.registrations_disabled) {
-          throw new Error(em.message || "New sign-ups are temporarily paused. Please try again later.");
+        const signupAvailability = await getSignupAvailability();
+        if (signupAvailability.registrationsDisabled) {
+          throw new Error(signupAvailability.message || "New sign-ups are temporarily paused. Please try again later.");
         }
         const { error } = await supabase.auth.signUp({
           email,
