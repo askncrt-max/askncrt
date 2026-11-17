@@ -15,6 +15,13 @@
       "when": 1794657902394,
       "tag": "0001_restrict_admin_control_reads",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794908545493,
+      "tag": "0002_payu_test_payments",
+      "breakpoints": true
     }
   ]
 }

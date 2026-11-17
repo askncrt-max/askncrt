@@ -690,6 +690,59 @@ export type Database = {
         }
         Relationships: []
       }
+      payments: {
+        Row: {
+          amount_inr: number
+          created_at: string
+          currency: string
+          failure_code: string | null
+          id: string
+          paid_at: string | null
+          payu_transaction_id: string | null
+          plan_code: string
+          provider: string
+          status: string
+          txnid: string
+          user_id: string
+        }
+        Insert: {
+          amount_inr: number
+          created_at?: string
+          currency?: string
+          failure_code?: string | null
+          id?: string
+          paid_at?: string | null
+          payu_transaction_id?: string | null
+          plan_code: string
+          provider?: string
+          status?: string
+          txnid: string
+          user_id: string
+        }
+        Update: {
+          amount_inr?: number
+          created_at?: string
+          currency?: string
+          failure_code?: string | null
+          id?: string
+          paid_at?: string | null
+          payu_transaction_id?: string | null
+          plan_code?: string
+          provider?: string
+          status?: string
+          txnid?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_plan_code_fkey"
+            columns: ["plan_code"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       planner_tasks: {
         Row: {
           created_at: string
@@ -1314,6 +1367,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      finalize_payu_payment: {
+        Args: { _payu_transaction_id: string; _txnid: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
