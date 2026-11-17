@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Keep legal documents as public TanStack routes and run self-account deletion and consent recording through authenticated server functions; this reuses the existing auth boundary and avoids changing the admin system.
+- Keep PayU checkout in server-generated test-mode form data and a public callback that verifies PayU before atomically recording payment or activating a plan; this keeps credentials and premium grants out of the browser.
