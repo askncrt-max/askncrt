@@ -48,6 +48,7 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedChatIndexRouteImport } from './routes/_authenticated/chat.index'
 import { Route as AuthenticatedChatThreadIdRouteImport } from './routes/_authenticated/chat.$threadId'
 import { Route as AuthenticatedSettingsMemoryRouteImport } from './routes/_authenticated/settings.memory'
+import { Route as ApiPublicPayuCallbackRouteImport } from './routes/api/public/payu/callback'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -246,6 +247,11 @@ const AuthenticatedSettingsMemoryRoute =
     path: '/memory',
     getParentRoute: () => AuthenticatedSettingsRoute,
   } as any)
+const ApiPublicPayuCallbackRoute = ApiPublicPayuCallbackRouteImport.update({
+  id: '/api/public/payu/callback',
+  path: '/api/public/payu/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -286,6 +292,7 @@ export interface FileRoutesByFullPath {
   '/chat/$threadId': typeof AuthenticatedChatThreadIdRoute
   '/settings/memory': typeof AuthenticatedSettingsMemoryRoute
   '/chat/': typeof AuthenticatedChatIndexRoute
+  '/api/public/payu/callback': typeof ApiPublicPayuCallbackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -324,6 +331,7 @@ export interface FileRoutesByTo {
   '/chat/$threadId': typeof AuthenticatedChatThreadIdRoute
   '/settings/memory': typeof AuthenticatedSettingsMemoryRoute
   '/chat': typeof AuthenticatedChatIndexRoute
+  '/api/public/payu/callback': typeof ApiPublicPayuCallbackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -366,6 +374,7 @@ export interface FileRoutesById {
   '/_authenticated/chat/$threadId': typeof AuthenticatedChatThreadIdRoute
   '/_authenticated/settings/memory': typeof AuthenticatedSettingsMemoryRoute
   '/_authenticated/chat/': typeof AuthenticatedChatIndexRoute
+  '/api/public/payu/callback': typeof ApiPublicPayuCallbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -408,6 +417,7 @@ export interface FileRouteTypes {
     | '/chat/$threadId'
     | '/settings/memory'
     | '/chat/'
+    | '/api/public/payu/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -446,6 +456,7 @@ export interface FileRouteTypes {
     | '/chat/$threadId'
     | '/settings/memory'
     | '/chat'
+    | '/api/public/payu/callback'
   id:
     | '__root__'
     | '/'
@@ -487,6 +498,7 @@ export interface FileRouteTypes {
     | '/_authenticated/chat/$threadId'
     | '/_authenticated/settings/memory'
     | '/_authenticated/chat/'
+    | '/api/public/payu/callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -501,6 +513,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiPublicPayuCallbackRoute: typeof ApiPublicPayuCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -778,6 +791,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsMemoryRouteImport
       parentRoute: typeof AuthenticatedSettingsRoute
     }
+    '/api/public/payu/callback': {
+      id: '/api/public/payu/callback'
+      path: '/api/public/payu/callback'
+      fullPath: '/api/public/payu/callback'
+      preLoaderRoute: typeof ApiPublicPayuCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -888,6 +908,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiPublicPayuCallbackRoute: ApiPublicPayuCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

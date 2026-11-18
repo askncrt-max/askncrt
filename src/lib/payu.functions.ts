@@ -87,3 +87,20 @@ export const beginPayuCheckout = createServerFn({ method: "POST" })
     };
     return { checkoutUrl: TEST_CHECKOUT_URL, fields };
   });
+
+export const getMyPayuPaymentStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ txnid: z.string().regex(/^txn_[A-Za-z0-9]{21}$/) }).parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    const { data: payment, error } = await context.supabase
+      .from("payments")
+      .select("plan_code, amount_inr, status, paid_at")
+      .eq("user_id", context.userId)
+      .eq("txnid", data.txnid)
+      .eq("provider", "payu")
+      .maybeSingle();
+    if (error) throw new Error("Payment status could not be checked.");
+    return payment;
+  });

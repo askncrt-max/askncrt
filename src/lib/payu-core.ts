@@ -14,6 +14,17 @@ export function safePayuHashMatch(expected: string, received: string): boolean {
   return difference === 0;
 }
 
+export function isVerifiedPayuSuccess(
+  status: string,
+  amount: string,
+  expectedInr: number,
+  payuTransactionId: string,
+): boolean {
+  return status.toLowerCase() === "success" &&
+    amountMatchesExpectedInr(amount, expectedInr) &&
+    payuTransactionId.length > 0;
+}
+
 export async function sha512Hex(value: string): Promise<string> {
   const bytes = new TextEncoder().encode(value);
   const digest = await crypto.subtle.digest("SHA-512", bytes);

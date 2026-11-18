@@ -85,7 +85,7 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
     const ownedTables = [
       "achievements", "files", "goals", "exams", "messages", "conversations", "notes",
       "planner_tasks", "quiz_attempts", "quiz_questions", "quizzes", "reminders",
-      "study_sessions", "subscriptions", "user_memory",
+      "study_sessions", "subscriptions", "payments", "user_memory",
     ];
 
     for (const table of ownedTables) {

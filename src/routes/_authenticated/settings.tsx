@@ -1,13 +1,14 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
-import { Loader2, Moon, Sun, LogOut, Trash2, FileText, ShieldCheck } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Loader2, Moon, Sun, LogOut, Trash2, FileText, ShieldCheck, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { getProfile, updateProfile } from "@/lib/profile.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { deleteMyAccount } from "@/lib/profile.functions";
+import { beginPayuCheckout, getMyPayuPaymentStatus } from "@/lib/payu.functions";
 import { LEGAL_ACCEPTANCE_PENDING_KEY } from "@/lib/legal-versions";
 import { Button } from "@/components/ui/button";
 import {
@@ -49,10 +50,30 @@ function SettingsPage() {
   const get = useServerFn(getProfile);
   const update = useServerFn(updateProfile);
   const deleteAccount = useServerFn(deleteMyAccount);
+  const startCheckout = useServerFn(beginPayuCheckout);
+  const checkPaymentStatus = useServerFn(getMyPayuPaymentStatus);
   const [deleteConfirmed, setDeleteConfirmed] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<"plus" | "pro">("plus");
+  const [phone, setPhone] = useState("");
+  const [checkoutForm, setCheckoutForm] = useState<{ url: string; fields: Record<string, string> } | null>(null);
+  const checkoutFormRef = useRef<HTMLFormElement>(null);
+  const [checkoutPending, setCheckoutPending] = useState(false);
 
   const { data: profile, isLoading } = useQuery({ queryKey: ["profile"], queryFn: () => get() });
+  const { data: paidPlans = [] } = useQuery({
+    queryKey: ["paid-plans"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("plans")
+        .select("code, name, price_inr")
+        .eq("active", true)
+        .in("code", ["plus", "pro"])
+        .order("sort_order");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
 
   const [name, setName] = useState("");
   const [classLevel, setClassLevel] = useState("");
@@ -73,6 +94,29 @@ function SettingsPage() {
     setDark(isDark);
     document.documentElement.classList.toggle("dark", isDark);
   }, []);
+
+  useEffect(() => {
+    if (checkoutForm) checkoutFormRef.current?.submit();
+  }, [checkoutForm]);
+
+  useEffect(() => {
+    const search = new URLSearchParams(window.location.search);
+    const paymentResult = search.get("payment");
+    const txnid = search.get("txnid");
+    if (!paymentResult || !txnid) return;
+    window.history.replaceState({}, "", window.location.pathname);
+    void checkPaymentStatus({ data: { txnid } })
+      .then((payment) => {
+        if (payment?.status === "success") {
+          toast.success(`PayU test payment verified. ${payment.plan_code.toUpperCase()} is active.`);
+          qc.invalidateQueries({ queryKey: ["profile"] });
+          qc.invalidateQueries({ queryKey: ["paid-plans"] });
+        } else {
+          toast.error("Payment was not verified. Your plan was not changed.");
+        }
+      })
+      .catch(() => toast.error("Payment status could not be confirmed. Please check your current plan."));
+  }, [checkPaymentStatus, qc]);
 
   function toggleDark() {
     const next = !dark;
@@ -112,6 +156,22 @@ function SettingsPage() {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Account deletion failed. Please try again.");
       setDeleting(false);
+    }
+  }
+
+  async function payForPlan() {
+    const normalizedPhone = phone.replace(/\D/g, "");
+    if (!/^\d{10,15}$/.test(normalizedPhone)) {
+      toast.error("Enter a valid phone number to continue to PayU.");
+      return;
+    }
+    setCheckoutPending(true);
+    try {
+      const checkout = await startCheckout({ data: { planCode: selectedPlan, phone: normalizedPhone } });
+      setCheckoutForm({ url: checkout.checkoutUrl, fields: checkout.fields });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not start PayU checkout.");
+      setCheckoutPending(false);
     }
   }
 
@@ -204,6 +264,52 @@ function SettingsPage() {
                   />
                 </span>
               </button>
+            </Card>
+
+            <Card title="AskNCERT Plus & Pro">
+              <p className="text-sm text-muted-foreground">
+                Current plan: <span className="font-semibold capitalize text-foreground">{profile?.plan || "free"}</span>
+              </p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {paidPlans.map((plan) => (
+                  <button
+                    key={plan.code}
+                    type="button"
+                    onClick={() => setSelectedPlan(plan.code as "plus" | "pro")}
+                    className={
+                      "flex min-h-16 items-center justify-between rounded-xl border px-4 py-3 text-left text-sm " +
+                      (selectedPlan === plan.code ? "border-primary bg-primary-soft" : "border-border bg-background hover:bg-muted")
+                    }
+                  >
+                    <span className="font-semibold">{plan.name}</span>
+                    <span className="text-muted-foreground">₹{plan.price_inr}/month</span>
+                  </button>
+                ))}
+              </div>
+              <Field label="Phone number for PayU">
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel"
+                  value={phone}
+                  onChange={(event) => setPhone(event.target.value)}
+                  maxLength={20}
+                  placeholder="10-digit phone number"
+                  className="w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </Field>
+              <Button onClick={() => void payForPlan()} disabled={checkoutPending || paidPlans.length === 0}>
+                {checkoutPending ? <Loader2 className="size-4 animate-spin" /> : <CreditCard className="size-4" />}
+                Continue to PayU test checkout
+              </Button>
+              <p className="text-xs text-muted-foreground">Test mode only. Your plan changes only after PayU confirms payment.</p>
+              {checkoutForm && (
+                <form ref={checkoutFormRef} action={checkoutForm.url} method="post" aria-hidden="true" className="hidden">
+                  {Object.entries(checkoutForm.fields).map(([name, value]) => (
+                    <input key={name} type="hidden" name={name} value={value} />
+                  ))}
+                </form>
+              )}
             </Card>
 
             <Card title="Privacy & Legal">
