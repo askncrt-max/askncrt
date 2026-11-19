@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { sha512Hex } from "@/lib/payu-core";
@@ -9,7 +10,10 @@ const CheckoutInput = z.object({
 });
 
 const TEST_CHECKOUT_URL = "https://test.payu.in/_payment";
-const CALLBACK_URL = "https://askncrt.lovable.app/api/public/payu/callback";
+const ALLOWED_CALLBACK_ORIGINS = new Set([
+  "https://askncrt.lovable.app",
+  "https://id-preview--c0009550-8917-4c29-9502-b306183e4b54.lovable.app",
+]);
 
 export const beginPayuCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -60,6 +64,11 @@ export const beginPayuCheckout = createServerFn({ method: "POST" })
     const txnid = `txn_${crypto.randomUUID().replaceAll("-", "").slice(0, 21)}`;
     const fieldsForHash = [key, txnid, amount, productinfo, firstname, email, ...Array(10).fill("")];
     const hash = await sha512Hex(`${fieldsForHash.join("|")}|${salt}`);
+    const requestUrl = new URL(getRequest().url);
+    const callbackOrigin = ALLOWED_CALLBACK_ORIGINS.has(requestUrl.origin)
+      ? requestUrl.origin
+      : "https://askncrt.lovable.app";
+    const callbackUrl = new URL("/api/public/payu/callback", callbackOrigin).toString();
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error: insertError } = await supabaseAdmin.from("payments").insert({
@@ -81,8 +90,8 @@ export const beginPayuCheckout = createServerFn({ method: "POST" })
       firstname,
       email,
       phone: data.phone,
-      surl: CALLBACK_URL,
-      furl: CALLBACK_URL,
+      surl: callbackUrl,
+      furl: callbackUrl,
       hash,
     };
     return { checkoutUrl: TEST_CHECKOUT_URL, fields };

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX payments_payu_transaction_id_unique ON public.payments(payu_transaction_id) WHERE payu_transaction_id IS NOT NULL;

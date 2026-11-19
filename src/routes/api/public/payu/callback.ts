@@ -1,5 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { isVerifiedPayuSuccess, safePayuHashMatch, sha512Hex } from "@/lib/payu-core";
+import {
+  amountMatchesExpectedInr,
+  isVerifiedPayuSuccess,
+  payuResponseHashInput,
+  safePayuHashMatch,
+  sha512Hex,
+} from "@/lib/payu-core";
 
 const TEST_VERIFY_URL = "https://test.payu.in/merchant/postservice?form=2";
 const ALLOWED_RETURN_ORIGINS = new Set([
@@ -15,23 +21,6 @@ function getReturnUrl(request: Request, status: string, txnid?: string): URL {
   const returnUrl = new URL(`/settings?payment=${encodeURIComponent(status)}`, origin);
   if (txnid) returnUrl.searchParams.set("txnid", txnid);
   return returnUrl;
-}
-
-function reverseHashInput(values: FormData, salt: string): string {
-  const status = String(values.get("status") ?? "");
-  const additional = String(values.get("additionalCharges") ?? values.get("additional_charges") ?? "");
-  const common = [
-    status,
-    "", "", "", "", "",
-    ...Array.from({ length: 5 }, (_, index) => String(values.get(`udf${5 - index}`) ?? "")),
-    String(values.get("email") ?? ""),
-    String(values.get("firstname") ?? ""),
-    String(values.get("productinfo") ?? ""),
-    String(values.get("amount") ?? ""),
-    String(values.get("txnid") ?? ""),
-    String(values.get("key") ?? ""),
-  ];
-  return additional ? [additional, salt, ...common].join("|") : [salt, ...common].join("|");
 }
 
 function parseVerifyDetails(payload: unknown, txnid: string): Record<string, unknown> | null {
@@ -58,6 +47,8 @@ export const Route = createFileRoute("/api/public/payu/callback")({
     handlers: {
       POST: async ({ request }) => {
         const returnUrl = getReturnUrl(request, "failed");
+        const contentLength = Number(request.headers.get("content-length") ?? 0);
+        if (contentLength > 16_384) return Response.redirect(returnUrl, 303);
         const key = process.env["PAYU_MERCHANT_KEY"];
         const salt = process.env["PAYU_MERCHANT_SALT"];
         if (!key || !salt) return Response.redirect(returnUrl, 303);
@@ -94,7 +85,14 @@ export const Route = createFileRoute("/api/public/payu/callback")({
         }
         if (payment.status !== "pending") return Response.redirect(returnUrl, 303);
 
-        const callbackHash = await sha512Hex(reverseHashInput(form, salt));
+        const responseFields: Record<string, string> = {};
+        for (const field of [
+          "status", "additionalCharges", "additional_charges", "udf1", "udf2", "udf3", "udf4", "udf5",
+          "email", "firstname", "productinfo", "amount", "txnid", "key",
+        ]) {
+          responseFields[field] = text(field);
+        }
+        const callbackHash = await sha512Hex(payuResponseHashInput(responseFields, salt));
         if (!safePayuHashMatch(callbackHash, receivedHash)) {
           return Response.redirect(transactionReturnUrl, 303);
         }
@@ -134,18 +132,18 @@ export const Route = createFileRoute("/api/public/payu/callback")({
         }
         if (!verifyResponse.ok) {
           console.error(`PayU test verification failed [${verifyResponse.status}]`);
-          return Response.redirect(returnUrl, 303);
+          return Response.redirect(transactionReturnUrl, 303);
         }
 
         let verifyPayload: unknown;
         try {
           verifyPayload = await verifyResponse.json();
         } catch {
-          return Response.redirect(returnUrl, 303);
+          return Response.redirect(transactionReturnUrl, 303);
         }
         const details = parseVerifyDetails(verifyPayload, txnid);
         const verifiedStatus = String(details?.status ?? "").toLowerCase();
-        const verifiedTxnid = String(details?.txnid ?? "");
+        const verifiedTxnid = String(details?.txnid ?? details?.request_id ?? "");
         const verifiedAmount = String(details?.amt ?? details?.amount ?? "");
         const payuTransactionId = String(details?.mihpayid ?? details?.mihpayupid ?? "");
         if (
@@ -158,7 +156,7 @@ export const Route = createFileRoute("/api/public/payu/callback")({
             .update({ status: "failed", failure_code: "verification_mismatch" })
             .eq("txnid", txnid)
             .eq("status", "pending");
-          return Response.redirect(returnUrl, 303);
+          return Response.redirect(transactionReturnUrl, 303);
         }
 
         const { data: result, error: finalizeError } = await supabaseAdmin.rpc(
@@ -167,7 +165,7 @@ export const Route = createFileRoute("/api/public/payu/callback")({
         );
         if (finalizeError || !["success", "already_processed"].includes(String(result))) {
           console.error("PayU payment could not be finalized atomically.");
-          return Response.redirect(returnUrl, 303);
+          return Response.redirect(transactionReturnUrl, 303);
         }
 
         return Response.redirect(getReturnUrl(request, "success", txnid), 303);

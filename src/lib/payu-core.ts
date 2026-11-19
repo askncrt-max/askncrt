@@ -25,6 +25,31 @@ export function isVerifiedPayuSuccess(
     payuTransactionId.length > 0;
 }
 
+export function payuResponseHashInput(
+  response: Record<string, string>,
+  salt: string,
+): string {
+  const fields = [
+    response.status ?? "",
+    "", "", "", "", "",
+    response.udf5 ?? "",
+    response.udf4 ?? "",
+    response.udf3 ?? "",
+    response.udf2 ?? "",
+    response.udf1 ?? "",
+    response.email ?? "",
+    response.firstname ?? "",
+    response.productinfo ?? "",
+    response.amount ?? "",
+    response.txnid ?? "",
+    response.key ?? "",
+  ];
+  const additionalCharges = response.additionalCharges ?? response.additional_charges;
+  return additionalCharges
+    ? [additionalCharges, salt, ...fields].join("|")
+    : [salt, ...fields].join("|");
+}
+
 export async function sha512Hex(value: string): Promise<string> {
   const bytes = new TextEncoder().encode(value);
   const digest = await crypto.subtle.digest("SHA-512", bytes);

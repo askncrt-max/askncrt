@@ -22,6 +22,13 @@
       "when": 1794908545493,
       "tag": "0002_payu_test_payments",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795099041967,
+      "tag": "0003_payu_transaction_uniqueness",
+      "breakpoints": true
     }
   ]
 }
