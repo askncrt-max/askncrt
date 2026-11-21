@@ -36,7 +36,7 @@ describe("PayU test payment validation", () => {
         { status: "success", udf1: "one", udf5: "five", email: "s@example.com", firstname: "A", productinfo: "Plus", amount: "99.00", txnid: "t1", key: "merchant" },
         "salt",
       ),
-      "salt|success||||||five|||||one|s@example.com|A|Plus|99.00|t1|merchant",
+      "salt|success||||||five||||one|s@example.com|A|Plus|99.00|t1|merchant",
     );
     assert.equal(
       payuResponseHashInput({ status: "success", additionalCharges: "1.00", txnid: "t1" }, "salt"),
